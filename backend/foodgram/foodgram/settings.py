@@ -1,13 +1,20 @@
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#w+u!kvzmcl3r0yj6_@&9x26@lfh%$)dnn4t5zu%7ne80io(z6'
+dotenv_path = os.path.join(BASE_DIR.parent.parent, '.env')
+load_dotenv(dotenv_path)
+
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+if os.getenv('DJANGO_ENV') == 'production':
+    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS_PROD', '').split(',')
+else:
+    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS_DEV', '').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -58,15 +65,12 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'super',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        'OPTIONS': {
-            'options': '-c client_encoding=utf8',
-        },
-    }
+        'NAME': os.getenv('POSTGRES_DB', 'postgres'),
+        'USER': os.getenv('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+        'HOST': os.getenv('DB_HOST', ''),
+        'PORT': os.getenv('DB_PORT', 5432)
+    },
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -120,5 +124,3 @@ DJOSER = {
         'user': ['users.permissions.IsOwnerOrReadOnly'],
     },
 }
-
-
