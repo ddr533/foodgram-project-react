@@ -21,3 +21,32 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.name[:15]
+
+
+class Tag(models.Model):
+    name = models.CharField(
+        max_length=150,
+        blank=False,
+        unique=True,
+        db_index=True,
+        verbose_name='Название'
+    )
+    color = models.CharField(
+        max_length=6,
+        blank=False,
+        verbose_name='Цвет(HEX)'
+    )
+    slug = models.SlugField(
+        max_length=150,
+        blank=False,
+        unique=True,
+        verbose_name='Слаг'
+    )
+
+    class Meta:
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
+        ordering = ('id', 'name')
+
+    def __str__(self):
+        return self.name[:15]
