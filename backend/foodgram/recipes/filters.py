@@ -20,10 +20,23 @@ class RecipeFilter(django_filters.FilterSet):
     author = django_filters.CharFilter(field_name='author__username')
     tags = django_filters.CharFilter(method='filter_tags')
 
+    class Meta:
+        model = Recipe
+        fields = ['author', 'tags']
+
     def filter_tags(self, queryset, name, value):
         tags = self.request.GET.getlist('tags')
         return queryset.filter(tag__slug__in=tags)
 
-    class Meta:
-        model = Recipe
-        fields = ['author', 'tags']
+
+class IsFavoriteFilterBackend(filters.BaseFilterBackend):
+    def filter_queryset(self, request, queryset, view):
+        is_favorite = request.query_params.get('is_favorite')
+        if is_favorite is not None:
+            is_favorite = bool(int(is_favorite))
+            user = request.user
+            if is_favorite:
+                queryset = queryset.filter(favorites__user=user)
+            else:
+                queryset = queryset.exclude(favorites__user=user)
+        return queryset

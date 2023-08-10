@@ -2,12 +2,9 @@ import base64
 import binascii
 
 from django.core.files.base import ContentFile
-from django.db.models import F
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
-from .models import Ingredient, Tag, Recipe, IngredientRecipe
+from .models import Ingredient, Tag, Recipe, IngredientRecipe, Favorite
 from users.serializers import CustomUserSerializer
 
 
@@ -37,6 +34,7 @@ class IngredientsSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Tag
         fields = ('__all__')
@@ -64,11 +62,18 @@ class RecipeSerializer(serializers.ModelSerializer):
         author = CustomUserSerializer(read_only=True)
         ingredients = RecipeIngredientSerializer(
             many=True, source='recipe_ingredients')
+        is_favorite = serializers.SerializerMethodField()
 
         class Meta:
             model = Recipe
-            fields = ('id', 'tags', 'author', 'ingredients', 'name',
-                      'image', 'text', 'cooking_time')
+            fields = ('id', 'tags', 'author', 'ingredients', 'is_favorite',
+                      'name', 'image', 'text', 'cooking_time')
+
+        def get_is_favorite(self, obj):
+            request = self.context.get('request')
+            if request and request.user.is_authenticated:
+                return obj.favorites.filter(user=request.user).exists()
+            return False
 
         def create(self, validated_data):
             ingredients_data = validated_data.pop('recipe_ingredients')
@@ -116,7 +121,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         def validate(self, attrs):
             attrs = super().validate(attrs)
-            print(attrs)
             # Проверяем, что поле 'tags' не является пустым списком.
             tags = attrs.get('tag')
             if not tags:
@@ -138,3 +142,21 @@ class RecipeSerializer(serializers.ModelSerializer):
                 raise ValidationError(
                     'У вас уже есть рецепт с таким названием.')
             return attrs
+
+
+class RecipeForFavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+class FavoriteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Favorite
+        fields = ('__all__')
+        read_only_fields = ('user', 'favorite_recipe')
+
+    def to_representation(self, instance):
+        recipe_data = RecipeForFavoriteSerializer(
+            instance=instance.favorite_recipe).data
+        return recipe_data

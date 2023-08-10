@@ -1,6 +1,5 @@
 from rest_framework.exceptions import MethodNotAllowed
-from rest_framework.permissions import BasePermission, IsAuthenticated, \
-    SAFE_METHODS
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class IsOwnerOrReadOnly(BasePermission):

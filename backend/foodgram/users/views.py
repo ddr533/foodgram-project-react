@@ -43,7 +43,7 @@ class SubscriptionViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
                           viewsets.GenericViewSet):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionListSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         subscribed_users = User.objects.filter(

@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.db import models
-
+from django.db.models import UniqueConstraint
 
 User = get_user_model()
 
@@ -62,12 +62,12 @@ class Recipe(models.Model):
     author = models.ForeignKey(
         to=User,
         on_delete=models.CASCADE,
+        db_index=True,
         verbose_name='Автор'
     )
     name = models.CharField(
         max_length=200,
         blank=False,
-        db_index=True,
         verbose_name='Название'
     )
     text = models.TextField(
@@ -89,6 +89,7 @@ class Recipe(models.Model):
         to=Tag,
         related_name='recipes',
         verbose_name='Теги',
+        db_index=True,
         blank=False,
     )
     ingredient = models.ManyToManyField(
@@ -135,3 +136,29 @@ class IngredientRecipe(models.Model):
         ordering = ('recipe', 'id',)
         verbose_name = 'Ингридиенты рецепта'
         verbose_name_plural = 'Ингридиенты рецептов'
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name='Пользователи',
+    )
+    favorite_recipe = models.ForeignKey(
+        to=Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorites',
+        verbose_name='Избранные рецепты',
+    )
+
+    class Meta:
+        verbose_name = 'Избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
+        constraints = [
+            UniqueConstraint(fields=('user', 'favorite_recipe'),
+                             name='unique_user_and_favorite_recipe')
+        ]
+
+    def __str__(self):
+        return f'{self.user} подписан на {self.favorite_recipe}'

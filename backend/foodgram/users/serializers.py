@@ -46,18 +46,16 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, attrs):
+        attrs = super().validate(attrs)
         user = attrs['user']
         author = attrs['author']
-
         if user == author:
             raise serializers.ValidationError(
                 'Вы не можете подписываться на себя.')
-
         if Subscription.objects.filter(
                 Q(user=user) & Q(author=author)).exists():
             raise serializers.ValidationError(
                 'Вы уже подписаны на этого автора.')
-
         return attrs
 
 
