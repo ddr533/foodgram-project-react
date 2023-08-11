@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
@@ -142,10 +141,10 @@ class Favorite(models.Model):
     user = models.ForeignKey(
         to=User,
         on_delete=models.CASCADE,
-        related_name='favorites',
-        verbose_name='Пользователи',
+        related_name='favorite_recipes',
+        verbose_name='Пользователь',
     )
-    favorite_recipe = models.ForeignKey(
+    recipe = models.ForeignKey(
         to=Recipe,
         on_delete=models.CASCADE,
         related_name='favorites',
@@ -156,9 +155,35 @@ class Favorite(models.Model):
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
         constraints = [
-            UniqueConstraint(fields=('user', 'favorite_recipe'),
+            UniqueConstraint(fields=('user', 'recipe'),
                              name='unique_user_and_favorite_recipe')
         ]
 
     def __str__(self):
-        return f'{self.user} подписан на {self.favorite_recipe}'
+        return f'{self.user} подписан на {self.recipe}'
+
+
+class BuyList(models.Model):
+    user = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        related_name='buylist_recipes',
+        verbose_name='Пользователь',
+    )
+    recipe = models.ForeignKey(
+        to=Recipe,
+        on_delete=models.CASCADE,
+        related_name='buylist',
+        verbose_name='Список покупок',
+    )
+
+    class Meta:
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'
+        constraints = [
+            UniqueConstraint(fields=('user', 'recipe'),
+                             name='unique_user_and_buylist_recipe')
+        ]
+
+    def __str__(self):
+        return f'{self.user} покупает {self.recipe}'

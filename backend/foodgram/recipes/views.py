@@ -1,18 +1,20 @@
 import django_filters
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q, Exists, OuterRef, When, Case
-from django.forms import BooleanField
+from django.db.models import Q, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets, filters, status
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .serializers import (IngredientsSerializer,
-                          TagSerializer,
-                          RecipeSerializer, FavoriteSerializer)
-from .models import Ingredient, Tag, Recipe, Favorite
+from .serializers import (IngredientsSerializer, TagSerializer,
+                          RecipeSerializer, FavoriteSerializer,
+                          BuyListSerializer)
+from .models import Ingredient, Tag, Recipe, Favorite, BuyList, IngredientRecipe
 from .filters import IngredientsSearch, RecipeFilter, IsFavoriteFilterBackend
 from .permissions import IsAuthorOrReadOnly, IsOwnerPage
+from .utils import get_ingredients_for_download
 
 
 class IngredientViewSet(mixins.ListModelMixin,
@@ -45,32 +47,63 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-class FavoriteViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
-    queryset = Favorite.objects.all()
-    serializer_class = FavoriteSerializer
+class BaseRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
+                        viewsets.GenericViewSet):
     permission_classes = (IsOwnerPage,)
     pagination_class = None
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer, model):
         recipe_id = self.kwargs.get('recipe_id')
         recipe = get_object_or_404(Recipe, id=recipe_id)
         user = self.request.user
-        if Favorite.objects.filter(
-                Q(user=user) & Q(favorite_recipe=recipe)).exists():
+        if model.objects.filter(
+                Q(user=user) & Q(recipe=recipe)).exists():
             raise ValidationError(
-                'Вы уже добавили эту подписку в избранное.')
-        serializer.save(user=user, favorite_recipe=recipe)
+                f'Вы уже добавили этот рецепт в {model._meta.verbose_name}.')
+        serializer.save(user=user, recipe=recipe)
+
+    def destroy(self, request, recipe_id, model):
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        instance = get_object_or_404(model,
+                                     user=self.request.user, recipe=recipe)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FavoriteViewSet(BaseRecipeViewSet):
+    queryset = Favorite.objects.all()
+    serializer_class = FavoriteSerializer
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer, Favorite)
 
     def destroy(self, request, recipe_id):
-        try:
-            instance = Favorite.objects.get(
-                user=self.request.user,
-                favorite_recipe=recipe_id)
-        except ObjectDoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        else:
-            instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return super().destroy(request, recipe_id, Favorite)
+
+
+class BuyListViewSet(BaseRecipeViewSet):
+    queryset = BuyList.objects.all()
+    serializer_class = BuyListSerializer
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer, BuyList)
+
+    def destroy(self, request, recipe_id):
+        return super().destroy(request, recipe_id, BuyList)
+
+
+class DownloadShoppingCart(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = self.request.user
+        ingredients = IngredientRecipe.objects.filter(
+            recipe__buylist__user=user
+        ).values('ingredient__name', 'ingredient__measurement_unit').annotate(
+            amount=Sum('amount')
+        )
+        response_content = get_ingredients_for_download(ingredients)
+        response = HttpResponse(response_content, content_type='text/plain')
+        response[
+            'Content-Disposition'] = 'attachment; filename="ingredients.txt"'
+        return response

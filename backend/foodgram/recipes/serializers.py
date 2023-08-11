@@ -5,7 +5,7 @@ from django.core.files.base import ContentFile
 from django.db.models import F
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from .models import Ingredient, Tag, Recipe, IngredientRecipe, Favorite
+from .models import Ingredient, Tag, Recipe, IngredientRecipe, Favorite, BuyList
 from users.serializers import CustomUserSerializer
 
 
@@ -135,20 +135,58 @@ class RecipeSerializer(serializers.ModelSerializer):
             return attrs
 
 
-class RecipeForFavoriteSerializer(serializers.ModelSerializer):
+class RepresentBaseRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
-class FavoriteSerializer(serializers.ModelSerializer):
+class BaseRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Favorite
         fields = ('__all__')
-        read_only_fields = ('user', 'favorite_recipe')
+        read_only_fields = ('user', 'recipe')
 
     def to_representation(self, instance):
-        recipe_data = RecipeForFavoriteSerializer(
-            instance=instance.favorite_recipe).data
+        recipe_data = RepresentBaseRecipeSerializer(
+            instance=instance.recipe).data
         return recipe_data
+
+
+class FavoriteSerializer(BaseRecipeSerializer):
+
+    class Meta(BaseRecipeSerializer.Meta):
+        model = Favorite
+
+class BuyListSerializer(BaseRecipeSerializer):
+
+    class Meta(BaseRecipeSerializer.Meta):
+        model = BuyList
+
+
+
+# class FavoriteSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = Favorite
+#         fields = ('__all__')
+#         read_only_fields = ('user', 'recipe')
+#
+#     def to_representation(self, instance):
+#         recipe_data = RepresentBaseRecipeSerializer(
+#             instance=instance.recipe).data
+#         return recipe_data
+#
+#
+# class BuyListSerializer(serializers.ModelSerializer):
+#
+#     class Meta:
+#         model = BuyList
+#         fields = ('__all__')
+#         read_only_fields = ('user', 'recipe')
+#
+#     def to_representation(self, instance):
+#         recipe_data = RecipeForFavoriteSerializer(
+#             instance=instance.recipe).data
+#         return recipe_data
+

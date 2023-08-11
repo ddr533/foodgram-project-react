@@ -12,7 +12,8 @@ class IsAuthorOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
     Для редактирования доступен только метод PATCH.
     """
 
-    message = 'Изменять контент может только его автор или админ.'
+    message = ('Изменять контент может только его автор или админ.'
+               ' Для редактирования доступен только метод PATCH.')
 
     def has_permission(self, request, view):
         if request.method == 'PUT':
@@ -27,15 +28,17 @@ class IsAuthorOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
 
 class IsOwnerPage(IsAuthenticated):
     """
-    Добавлять рецепт в избранное может только авторизованный пользователь.
-    Удалять рецепт из избранного может только владелец страницы.
+    Добавлять рецепт в избранное и список покупок может только
+    авторизованный пользователь. Удалять рецепт из избранного
+    и списка покупок может только владелец страницы.
     """
 
-    message = 'Удалить рецепт можно только со своей страницы избранного.'
+    message = 'Удалить рецепт можно только со своей страницы.'
 
     def has_permission(self, request, view):
+        model = view.queryset.model
         if request.method == 'DELETE':
             recipe_id = view.kwargs.get('recipe_id')
-            favorite = get_object_or_404(Favorite, favorite_recipe=recipe_id)
-            return favorite.user == request.user
+            object = get_object_or_404(model, recipe=recipe_id)
+            return object.user == request.user
         return super().has_permission(request, view)

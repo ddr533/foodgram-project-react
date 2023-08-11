@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Ingredient, Tag, Recipe, IngredientRecipe, Favorite
+from .models import (Ingredient, Tag, Recipe, IngredientRecipe, Favorite,
+                     BuyList)
 from .forms import RecipeForm
 
 
@@ -36,8 +37,13 @@ class AdminIngredientRecipe(admin.ModelAdmin):
 
 
 class FavoriteAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'favorite_recipe')
-    list_editable = ('user', 'favorite_recipe')
+    list_display = ('id', 'user', 'recipe')
+    list_editable = ('user', 'recipe')
+
+
+class BuyListAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'recipe')
+    list_editable = ('user', 'recipe')
 
 
 admin.site.register(Ingredient, AdminIngredient)
@@ -45,3 +51,4 @@ admin.site.register(Tag, AdminTag)
 admin.site.register(Recipe, AdminRecipe)
 admin.site.register(IngredientRecipe, AdminIngredientRecipe)
 admin.site.register(Favorite, FavoriteAdmin)
+admin.site.register(BuyList, BuyListAdmin)
