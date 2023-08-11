@@ -62,6 +62,7 @@ class Recipe(models.Model):
         to=User,
         on_delete=models.CASCADE,
         db_index=True,
+        related_name='recipes',
         verbose_name='Автор'
     )
     name = models.CharField(

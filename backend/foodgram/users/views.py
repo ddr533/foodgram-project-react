@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Case, When, Value, BooleanField
 from djoser.views import UserViewSet
 from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, \
     DestroyModelMixin
 from rest_framework.response import Response
@@ -41,40 +41,34 @@ class CustomUserViewSet(UserViewSet):
 
 class SubscriptionViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
                           viewsets.GenericViewSet):
-    queryset = Subscription.objects.all()
     serializer_class = SubscriptionListSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        subscribed_users = User.objects.filter(
-            subscribed__user=self.request.user).annotate(
-                    is_subscribed=Case(
-                    When(subscribed__user=self.request.user, then=True),
-                    default=False,
-                    output_field=BooleanField()
-                    )
-                    )
-        return subscribed_users
+        return User.objects.filter(subscribed__user=self.request.user)
 
-    def create(self, request, author_id):
-        data = {'user': request.user.id, 'author': author_id}
-        serializer = SubscriptionCreateSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        instance = User.objects.filter(id=author_id).annotate(
-            is_subscribed=Value(True, output_field=BooleanField())).first()
-        response_serializer = SubscriptionListSerializer(instance)
-        return Response(response_serializer.data,
-                        status=status.HTTP_201_CREATED)
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return SubscriptionCreateSerializer
+        return super().get_serializer_class()
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        author_id = self.kwargs.get('author_id')
+        context['user'] = self.request.user
+        if author_id:
+            author = get_object_or_404(User, id=author_id)
+            context['author'] = author
+        return context
+
+    def perform_create(self, serializer):
+        user = self.get_serializer_context().get('user')
+        author = self.get_serializer_context().get('author')
+        serializer.save(user=user, author=author)
 
     def destroy(self, request, author_id):
-        try:
-            instance = Subscription.objects.get(user=self.request.user,
-                                                author=author_id)
-        except ObjectDoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        else:
-            instance.delete()
+        author = get_object_or_404(User, id=author_id)
+        instance = get_object_or_404(Subscription,
+                                     user=self.request.user, author=author)
+        instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

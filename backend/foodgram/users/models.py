@@ -52,7 +52,7 @@ class Subscription(models.Model):
     user = models.ForeignKey(
         to=User,
         on_delete=models.CASCADE,
-        related_name='subscriber',
+        related_name='subscribers',
         verbose_name='Подписчик',
     )
     author = models.ForeignKey(
