@@ -39,6 +39,6 @@ class IsOwnerPage(IsAuthenticated):
         model = view.queryset.model
         if request.method == 'DELETE':
             recipe_id = view.kwargs.get('recipe_id')
-            object = get_object_or_404(model, recipe=recipe_id)
-            return object.user == request.user
+            user=request.user
+            return model.objects.filter(user=user, recipe=recipe_id).exists()
         return super().has_permission(request, view)

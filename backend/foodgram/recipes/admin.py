@@ -29,6 +29,12 @@ class AdminRecipe(admin.ModelAdmin):
     list_display = ('id', 'name', 'author')
     list_editable = ('name', 'author')
     list_filter = ('name', 'author', 'tag')
+    readonly_fields = ('id', 'total_favorite_count',)
+
+    def total_favorite_count(self, obj):
+        return obj.favorites.count()
+
+    total_favorite_count.short_description = 'Количество добавлений в избранное'
 
 
 class AdminIngredientRecipe(admin.ModelAdmin):
