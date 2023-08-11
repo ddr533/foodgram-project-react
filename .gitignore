@@ -5,7 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
-
+# папки со статикой и медиа
+media/
 # Distribution / packaging
 .Python
 build/
@@ -130,3 +131,4 @@ dmypy.json
 
 # .idea
 .idea
+/backend/foodgram/media/
