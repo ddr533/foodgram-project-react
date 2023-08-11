@@ -12,7 +12,7 @@ from .serializers import (IngredientsSerializer, TagSerializer,
                           RecipeSerializer, FavoriteSerializer,
                           BuyListSerializer)
 from .models import Ingredient, Tag, Recipe, Favorite, BuyList, IngredientRecipe
-from .filters import IngredientsSearch, RecipeFilter, IsFavoriteFilterBackend
+from .filters import IngredientsSearch, RecipeFilter, CustomFilterBackend
 from .permissions import IsAuthorOrReadOnly, IsOwnerPage
 from .utils import get_ingredients_for_download
 
@@ -38,10 +38,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
-                       filters.OrderingFilter, IsFavoriteFilterBackend)
+                       filters.OrderingFilter, CustomFilterBackend)
     filterset_class = RecipeFilter
     ordering_fields = ('pub_date', )
-    ordering = ('pub_date',)
+    ordering = ('-pub_date',)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

@@ -29,14 +29,24 @@ class RecipeFilter(django_filters.FilterSet):
         return queryset.filter(tag__slug__in=tags)
 
 
-class IsFavoriteFilterBackend(filters.BaseFilterBackend):
+class CustomFilterBackend(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         is_favorite = request.query_params.get('is_favorite')
-        if is_favorite is not None:
+        is_in_shopping_cart = request.query_params.get('is_in_shopping_cart')
+        user = request.user
+
+        if is_favorite is not None and user.is_authenticated:
             is_favorite = bool(int(is_favorite))
-            user = request.user
             if is_favorite:
                 queryset = queryset.filter(favorites__user=user)
             else:
                 queryset = queryset.exclude(favorites__user=user)
+
+        if is_in_shopping_cart is not None and user.is_authenticated:
+            is_in_shopping_cart = bool(int(is_in_shopping_cart))
+            if is_in_shopping_cart:
+                queryset = queryset.filter(buylist__user=user)
+            else:
+                queryset = queryset.exclude(buylist__user=user)
+
         return queryset
