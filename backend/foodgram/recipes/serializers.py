@@ -2,6 +2,7 @@ import base64
 import binascii
 
 from django.core.files.base import ContentFile
+from django.db.models import F
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from .models import Ingredient, Tag, Recipe, IngredientRecipe, Favorite
@@ -9,9 +10,7 @@ from users.serializers import CustomUserSerializer
 
 
 class Base64ImageField(serializers.ImageField):
-    """
-    Класс для работы с изображениями в формате base64.
-    """
+    """Класс для работы с изображениями в формате base64."""
 
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
@@ -48,12 +47,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         model = IngredientRecipe
         fields = ('id', 'amount')
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        ingredient_data = IngredientsSerializer(instance.ingredient).data
-        ingredient_data.update(representation)
-        return ingredient_data
-
 
 class RecipeSerializer(serializers.ModelSerializer):
         image = Base64ImageField()
@@ -89,15 +82,14 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         def to_representation(self, instance):
             representation = super().to_representation(instance)
-
-            tags = TagSerializer(instance.tag.all(), many=True)
-            recipe_ingredients = IngredientRecipe.objects.filter(
-                recipe=instance)
-            ingredients = RecipeIngredientSerializer(
-                recipe_ingredients,
-                many=True)
-            representation.update(
-                {'tags': tags.data, 'ingredients': ingredients.data})
+            representation['tags'] = TagSerializer(instance.tag.all(),
+                                                   many=True).data
+            annotated_ingredients = IngredientRecipe.objects.filter(
+                recipe=instance).annotate(
+                name=F('ingredient__name'),
+                measurement_unit=F('ingredient__measurement_unit')
+            ).values('id', 'name', 'measurement_unit', 'amount')
+            representation['ingredients'] = annotated_ingredients
             return representation
 
         def update(self, instance, validated_data):
@@ -116,7 +108,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                 amount = ingredient_data['amount']
                 IngredientRecipe.objects.create(
                     recipe=instance, ingredient=ingredient, amount=amount)
-
             return instance
 
         def validate(self, attrs):
@@ -145,6 +136,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeForFavoriteSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
