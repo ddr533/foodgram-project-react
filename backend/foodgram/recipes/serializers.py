@@ -147,6 +147,11 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RepresentBaseRecipeSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для представления отдельных полей модели Recipe.
+    Используется в методах to_representation всевозможных сериализаторов
+    для добавления рецептов на разные страницы.
+    """
 
     class Meta:
         model = Recipe
@@ -189,11 +194,13 @@ class BaseAddRecipeSerializer(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(BaseAddRecipeSerializer):
+    """Сериализатор для добавления рецептов в избранное."""
 
     class Meta(BaseAddRecipeSerializer.Meta):
         model = Favorite
 
 class BuyListSerializer(BaseAddRecipeSerializer):
+    """Сериализатор для добавления рецептов в корзину."""
 
     class Meta(BaseAddRecipeSerializer.Meta):
         model = BuyList

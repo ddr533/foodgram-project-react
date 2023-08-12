@@ -49,6 +49,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 class BaseAddRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
+    """
+    Базовый класс представлений для удаления и добавления
+    рецептов в корзину, в избранное и т.п.
+    """
+
     pagination_class = None
     lookup_field = 'recipe_id'
     permission_classes = (IsAuthenticated,)
@@ -68,19 +73,29 @@ class BaseAddRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
         except Exception:
             raise ValidationError()
         instance.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class FavoriteViewSet(BaseAddRecipeViewSet):
+    """Обработчик добавления рецептов в избранное."""
+
     queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
 
 
 class BuyListViewSet(BaseAddRecipeViewSet):
+    """Обработчик добавления рецептов в корзину."""
+
     queryset = BuyList.objects.all()
     serializer_class = BuyListSerializer
 
 
 class DownloadShoppingCart(APIView):
+    """
+    Обработчик выгрузки рецептов из корзины.
+    Выдает response с текстовым файлом.
+    """
+
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):
