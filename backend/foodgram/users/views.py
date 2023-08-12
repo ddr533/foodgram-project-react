@@ -4,29 +4,22 @@ from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
                                    DestroyModelMixin)
-from rest_framework.response import Response
 
 from .models import Subscription
-from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
-                          SubscriptionSerializer)
+from .serializers import (CustomUserSerializer,
+                          SubscriptionSerializer, CustomUserCreateSerializer)
+
 
 User = get_user_model()
 
 
 class CustomUserViewSet(UserViewSet):
-    serializer_classes = {
-        'create': CustomUserCreateSerializer,
-        'retrieve': CustomUserSerializer,
-        'list': CustomUserSerializer,
-        'me': CustomUserSerializer,
-    }
+    """Обработчик запросов к модели User."""
 
-    @action(detail=False, methods=['get'])
-    def me(self, request):
-        serializer = self.get_serializer(request.user)
-        return Response(serializer.data)
+    serializer_class = CustomUserSerializer
 
     def get_queryset(self):
         if self.action == 'list':
@@ -34,9 +27,14 @@ class CustomUserViewSet(UserViewSet):
         return super().get_queryset()
 
     def get_serializer_class(self):
-        if self.action in self.serializer_classes:
-            return self.serializer_classes[self.action]
-        return super().get_serializer_class()
+        if self.action == 'create':
+            return CustomUserCreateSerializer
+        return self.serializer_class
+
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
 
 
 class SubscriptionViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,

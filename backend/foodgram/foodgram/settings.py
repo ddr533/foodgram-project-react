@@ -115,9 +115,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 10,
-    'MAX_PAGE_SIZE': 10,
+    'DEFAULT_PAGINATION_CLASS': 'recipes.paginators.CustomPagination',
+    'PAGE_SIZE': 5,
+    'MAX_PAGE_SIZE': 20,
 }
 
 DJOSER = {

@@ -1,4 +1,5 @@
 from django.urls import path, include
+from djoser.views import UserViewSet
 from rest_framework.routers import DefaultRouter
 
 from .views import CustomUserViewSet, SubscriptionViewSet
@@ -16,5 +17,7 @@ urlpatterns = [
     path('<int:author_id>/subscribe/',
          SubscriptionViewSet.as_view({'post': 'create', 'delete': 'destroy'}),
          name='subscribe'),
+    path('set_password/',UserViewSet.as_view({'post': 'set_password'}),
+         name='set_password'),
     path('', include(router.urls)),
 ]

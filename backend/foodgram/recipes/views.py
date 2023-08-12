@@ -1,20 +1,21 @@
-import django_filters
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins, viewsets, filters, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import mixins, viewsets, status
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .permissions import IsAuthorOrReadOnly
+from .utils import get_ingredients_for_download
+from .models import Ingredient, Tag, Recipe, Favorite, BuyList, IngredientRecipe
+from .filters import IngredientsSearch, RecipeFilter, CustomFilterBackend
 from .serializers import (IngredientsSerializer, TagSerializer,
                           RecipeSerializer, FavoriteSerializer,
                           BuyListSerializer)
-from .models import Ingredient, Tag, Recipe, Favorite, BuyList, IngredientRecipe
-from .filters import IngredientsSearch, RecipeFilter, CustomFilterBackend
-from .permissions import IsAuthorOrReadOnly
-from .utils import get_ingredients_for_download
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -34,10 +35,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,
-                       filters.OrderingFilter, CustomFilterBackend)
+    filter_backends = (DjangoFilterBackend, OrderingFilter, CustomFilterBackend)
     filterset_class = RecipeFilter
-    ordering_fields = ('pub_date', )
+    ordering_fields = ('pub_date')
     ordering = ('-pub_date',)
 
     def perform_create(self, serializer):
