@@ -3,18 +3,30 @@ from django.core.validators import MaxValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
+
 User = get_user_model()
+
+CHARS_MAX_LEN = 150
+RECIPE_NAME_MAX_LEN = 200
+RECIPE_TEXT_MAX_LEN = 5000
+MEASUREMENT_UNIT_MAX_LEN = 20
+HEX_COLOR_MAX_LEN = 7
+MAX_COOKING_TIME = 1000
+MAX_AMOUNT_INGREDIENT = 5000
+STR_REPR_LEN = 20
 
 
 class Ingredient(models.Model):
+    """Ингредиенты для рецептов."""
+
     name = models.CharField(
-        max_length=150,
+        max_length=CHARS_MAX_LEN,
         blank=False,
         db_index=True,
         verbose_name='Название'
     )
     measurement_unit = models.CharField(
-        max_length=20,
+        max_length=MEASUREMENT_UNIT_MAX_LEN,
         blank=False,
         verbose_name='Единица измерения'
     )
@@ -25,24 +37,26 @@ class Ingredient(models.Model):
         ordering = ('id', 'name')
 
     def __str__(self):
-        return self.name[:15]
+        return self.name[:STR_REPR_LEN]
 
 
 class Tag(models.Model):
+    """Теги для рецептов."""
+
     name = models.CharField(
-        max_length=150,
+        max_length=CHARS_MAX_LEN,
         blank=False,
         unique=True,
         db_index=True,
         verbose_name='Название'
     )
     color = models.CharField(
-        max_length=7,
+        max_length=HEX_COLOR_MAX_LEN,
         blank=False,
         verbose_name='Цвет(HEX)'
     )
     slug = models.SlugField(
-        max_length=150,
+        max_length=CHARS_MAX_LEN,
         blank=False,
         unique=True,
         verbose_name='Слаг'
@@ -54,7 +68,7 @@ class Tag(models.Model):
         ordering = ('id', 'name')
 
     def __str__(self):
-        return self.name[:15]
+        return self.name[:STR_REPR_LEN]
 
 
 class Recipe(models.Model):
@@ -66,17 +80,17 @@ class Recipe(models.Model):
         verbose_name='Автор'
     )
     name = models.CharField(
-        max_length=200,
+        max_length=RECIPE_NAME_MAX_LEN,
         blank=False,
         verbose_name='Название'
     )
     text = models.TextField(
-        max_length=5000,
+        max_length=RECIPE_TEXT_MAX_LEN,
         blank=False,
         verbose_name='Описание'
     )
     cooking_time = models.PositiveIntegerField(
-        validators=[MaxValueValidator(1000)],
+        validators=[MaxValueValidator(MAX_COOKING_TIME)],
         blank=False,
         verbose_name='Время приготовления (минуты)'
     )
@@ -111,10 +125,12 @@ class Recipe(models.Model):
         verbose_name_plural = 'Рецепты'
 
     def __str__(self):
-        return self.name[:25]
+        return self.name[:STR_REPR_LEN]
 
 
 class IngredientRecipe(models.Model):
+    """Модель для связи ингредиентов и рецептов."""
+
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
@@ -127,7 +143,7 @@ class IngredientRecipe(models.Model):
         verbose_name='Рецепт'
     )
     amount = models.PositiveIntegerField(
-        validators=[MaxValueValidator(5000)],
+        validators=[MaxValueValidator(MAX_AMOUNT_INGREDIENT)],
         blank=False,
         verbose_name='Количество'
     )

@@ -17,17 +17,14 @@ from .permissions import IsAuthorOrReadOnly
 from .utils import get_ingredients_for_download
 
 
-class IngredientViewSet(mixins.ListModelMixin,
-                        mixins.RetrieveModelMixin,
-                        viewsets.GenericViewSet):
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
     filter_backends = (IngredientsSearch,)
     pagination_class = None
 
 
-class TagViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                        viewsets.GenericViewSet):
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
@@ -105,7 +102,8 @@ class DownloadShoppingCart(APIView):
         ).values('ingredient__name', 'ingredient__measurement_unit').annotate(
             amount=Sum('amount')
         )
-        response_content = get_ingredients_for_download(ingredients)
+        # Получаем строковое представление ingredients
+        response_content: str = get_ingredients_for_download(ingredients)
         response = HttpResponse(response_content, content_type='text/plain')
         response[
             'Content-Disposition'] = 'attachment; filename="ingredients.txt"'
