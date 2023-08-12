@@ -2,9 +2,12 @@ import base64
 import binascii
 
 from django.core.files.base import ContentFile
-from django.db.models import F
-from rest_framework import serializers
+from django.db.models import F, Q
+from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
+
 from .models import Ingredient, Tag, Recipe, IngredientRecipe, Favorite, BuyList
 from users.serializers import CustomUserSerializer
 
@@ -148,53 +151,49 @@ class RepresentBaseRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
+        read_only_fields = ('id', 'name', 'image', 'cooking_time')
 
-class BaseRecipeSerializer(serializers.ModelSerializer):
+
+class BaseAddRecipeSerializer(serializers.ModelSerializer):
+    """
+    Базовый класс для добавления авторизованным пользоватлем
+    рецепта в избранное, корзину и т.п. Response передается
+    как объект класса RepresentBaseRecipeSerializer.
+    """
 
     class Meta:
+        model = None
         fields = ('__all__')
         read_only_fields = ('user', 'recipe')
 
+    def validate(self, attrs):
+        model = self.Meta.model
+        user = self.context['request'].user
+        recipe = self.context['recipe']
+
+        if model.objects.filter(
+                Q(user=user) & Q(recipe=recipe)).exists():
+            raise ValidationError(
+                f'Вы уже добавили этот рецепт в {model._meta.verbose_name}.')
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        model = self.Meta.model
+        user = self.context['request'].user
+        recipe = self.context['recipe']
+        model.objects.create(user=user, recipe=recipe)
+        return recipe
+
     def to_representation(self, instance):
-        recipe_data = RepresentBaseRecipeSerializer(
-            instance=instance.recipe).data
-        return recipe_data
+        return RepresentBaseRecipeSerializer(instance).data
 
 
-class FavoriteSerializer(BaseRecipeSerializer):
+class FavoriteSerializer(BaseAddRecipeSerializer):
 
-    class Meta(BaseRecipeSerializer.Meta):
+    class Meta(BaseAddRecipeSerializer.Meta):
         model = Favorite
 
-class BuyListSerializer(BaseRecipeSerializer):
+class BuyListSerializer(BaseAddRecipeSerializer):
 
-    class Meta(BaseRecipeSerializer.Meta):
+    class Meta(BaseAddRecipeSerializer.Meta):
         model = BuyList
-
-
-
-# class FavoriteSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = Favorite
-#         fields = ('__all__')
-#         read_only_fields = ('user', 'recipe')
-#
-#     def to_representation(self, instance):
-#         recipe_data = RepresentBaseRecipeSerializer(
-#             instance=instance.recipe).data
-#         return recipe_data
-#
-#
-# class BuyListSerializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = BuyList
-#         fields = ('__all__')
-#         read_only_fields = ('user', 'recipe')
-#
-#     def to_representation(self, instance):
-#         recipe_data = RecipeForFavoriteSerializer(
-#             instance=instance.recipe).data
-#         return recipe_data
-

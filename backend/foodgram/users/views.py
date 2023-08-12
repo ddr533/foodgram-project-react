@@ -1,16 +1,15 @@
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
 from djoser.views import UserViewSet
 from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, \
-    DestroyModelMixin
+from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
+                                   DestroyModelMixin)
 from rest_framework.response import Response
 
 from .models import Subscription
-from .serializers import CustomUserCreateSerializer, CustomUserSerializer, \
-    SubscriptionListSerializer, SubscriptionCreateSerializer
+from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
+                          SubscriptionSerializer)
 
 User = get_user_model()
 
@@ -41,24 +40,18 @@ class CustomUserViewSet(UserViewSet):
 
 class SubscriptionViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
                           viewsets.GenericViewSet):
-    serializer_class = SubscriptionListSerializer
+    serializer_class = SubscriptionSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         return User.objects.filter(subscribed__user=self.request.user)
-
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return SubscriptionCreateSerializer
-        return super().get_serializer_class()
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         author_id = self.kwargs.get('author_id')
         context['user'] = self.request.user
         if author_id:
-            author = get_object_or_404(User, id=author_id)
-            context['author'] = author
+            context['author'] = get_object_or_404(User, id=author_id)
         return context
 
     def perform_create(self, serializer):

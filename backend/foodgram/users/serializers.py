@@ -29,7 +29,8 @@ class CustomUserSerializer(UserSerializer):
             return False
         return Subscription.objects.filter(user=user, author=obj).exists()
 
-class SubscriptionListSerializer(serializers.ModelSerializer):
+
+class SubscriptionSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -38,6 +39,9 @@ class SubscriptionListSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
                   'is_subscribed', 'recipes', 'recipes_count')
+        read_only_fields = ('email', 'id', 'username', 'first_name',
+                            'last_name', 'is_subscribed', 'recipes',
+                            'recipes_count')
 
     def get_is_subscribed(self, obj):
         return obj.subscribed.filter(user=self.context['user']).exists()
@@ -47,14 +51,6 @@ class SubscriptionListSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
-
-
-class SubscriptionCreateSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Subscription
-        fields = '__all__'
-        read_only_fields = ('user', 'author')
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
@@ -71,7 +67,10 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
                 'Вы не можете подписываться на себя.')
         return attrs
 
-    def to_representation(self, instance):
-        recipe_data = SubscriptionListSerializer(
-            instance=instance.author, context={'user': instance.user}).data
-        return recipe_data
+    def create(self, validated_data):
+        user = self.context['user']
+        author = self.context['author']
+        Subscription.objects.create(user=user, author=author)
+        return author
+
+

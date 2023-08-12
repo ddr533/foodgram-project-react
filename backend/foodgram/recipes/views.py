@@ -1,5 +1,5 @@
 import django_filters
-from django.db.models import Q, Sum
+from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets, filters, status
@@ -13,7 +13,7 @@ from .serializers import (IngredientsSerializer, TagSerializer,
                           BuyListSerializer)
 from .models import Ingredient, Tag, Recipe, Favorite, BuyList, IngredientRecipe
 from .filters import IngredientsSearch, RecipeFilter, CustomFilterBackend
-from .permissions import IsAuthorOrReadOnly, IsOwnerPage
+from .permissions import IsAuthorOrReadOnly
 from .utils import get_ingredients_for_download
 
 
@@ -47,49 +47,37 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
 
-class BaseRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
+class BaseAddRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
-    permission_classes = (IsOwnerPage,)
     pagination_class = None
+    lookup_field = 'recipe_id'
+    permission_classes = (IsAuthenticated,)
 
-    def perform_create(self, serializer, model):
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
         recipe_id = self.kwargs.get('recipe_id')
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        user = self.request.user
-        if model.objects.filter(
-                Q(user=user) & Q(recipe=recipe)).exists():
-            raise ValidationError(
-                f'Вы уже добавили этот рецепт в {model._meta.verbose_name}.')
-        serializer.save(user=user, recipe=recipe)
+        if recipe_id:
+            context['recipe'] = get_object_or_404(Recipe, id=recipe_id)
+        return context
 
-    def destroy(self, request, recipe_id, model):
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        instance = get_object_or_404(model,
-                                     user=self.request.user, recipe=recipe)
+    def destroy(self, request, recipe_id):
+        try:
+            user = request.user
+            recipe = Recipe.objects.get(id=recipe_id)
+            instance = self.queryset.get(user=user, recipe=recipe)
+        except Exception:
+            raise ValidationError()
         instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_200_OK)
 
-
-class FavoriteViewSet(BaseRecipeViewSet):
+class FavoriteViewSet(BaseAddRecipeViewSet):
     queryset = Favorite.objects.all()
     serializer_class = FavoriteSerializer
 
-    def perform_create(self, serializer):
-        super().perform_create(serializer, Favorite)
 
-    def destroy(self, request, recipe_id):
-        return super().destroy(request, recipe_id, Favorite)
-
-
-class BuyListViewSet(BaseRecipeViewSet):
+class BuyListViewSet(BaseAddRecipeViewSet):
     queryset = BuyList.objects.all()
     serializer_class = BuyListSerializer
-
-    def perform_create(self, serializer):
-        super().perform_create(serializer, BuyList)
-
-    def destroy(self, request, recipe_id):
-        return super().destroy(request, recipe_id, BuyList)
 
 
 class DownloadShoppingCart(APIView):

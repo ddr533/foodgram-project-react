@@ -24,21 +24,3 @@ class IsAuthorOrReadOnly(permissions.IsAuthenticatedOrReadOnly):
         return any((request.method in permissions.SAFE_METHODS,
                     request.user == obj.author,
                     request.user.is_superuser,))
-
-
-class IsOwnerPage(IsAuthenticated):
-    """
-    Добавлять рецепт в избранное и список покупок может только
-    авторизованный пользователь. Удалять рецепт из избранного
-    и списка покупок может только владелец страницы.
-    """
-
-    message = 'Удалить рецепт можно только со своей страницы.'
-
-    def has_permission(self, request, view):
-        model = view.queryset.model
-        if request.method == 'DELETE':
-            recipe_id = view.kwargs.get('recipe_id')
-            user=request.user
-            return model.objects.filter(user=user, recipe=recipe_id).exists()
-        return super().has_permission(request, view)
