@@ -31,6 +31,11 @@ class CustomUserSerializer(UserSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор данных из модели User c добавлением
+    дополнительных полей на основе отношений с моделью Subsription.
+    """
+
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -47,7 +52,12 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return obj.subscribed.filter(user=self.context['user']).exists()
 
     def get_recipes(self, obj):
-        return obj.recipes.all().values('id', 'name', 'image', 'cooking_time')
+        queryset = obj.recipes.all().values('id', 'name', 'image',
+                                            'cooking_time')
+        recipes_limit = self.context.get('recipes_limit')
+        if recipes_limit is not None:
+            return queryset[:recipes_limit]
+        return queryset
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
@@ -72,5 +82,3 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         author = self.context['author']
         Subscription.objects.create(user=user, author=author)
         return author
-
-

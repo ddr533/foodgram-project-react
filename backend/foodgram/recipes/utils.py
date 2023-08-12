@@ -1,10 +1,16 @@
-def get_ingredients_for_download(queryset):
+from django.db.models import QuerySet
+
+from .models import IngredientRecipe
+
+
+def get_ingredients_for_download(queryset: QuerySet[IngredientRecipe]) -> str:
     """
-    Принимает на вход queryset с нужными данными из БД.
-    Формирует и возвращает строку с нужным представлением полученных данных.
+    Принимает на вход queryset с даннными ингридиентов рецептов.
+    Формирует и возвращает строку с представлением
+    полученных данных в виде списка объекта.
     """
 
-    ingredient_list = ['Список покупок:', ]
+    ingredient_list: list = ['Список покупок:', ]
     for ingredient in queryset:
         line = (f'{ingredient["ingredient__name"]} '
                 f'({ingredient["ingredient__measurement_unit"]})'

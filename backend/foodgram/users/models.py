@@ -49,6 +49,8 @@ class User(AbstractUser):
 
 
 class Subscription(models.Model):
+    """Модель для добавления в БД подписок пользователей на авторов рецептов."""
+
     user = models.ForeignKey(
         to=User,
         on_delete=models.CASCADE,

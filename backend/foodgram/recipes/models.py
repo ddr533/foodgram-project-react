@@ -139,6 +139,8 @@ class IngredientRecipe(models.Model):
 
 
 class Favorite(models.Model):
+    """Модель для добавления в БД избранных рецептов пользователей."""
+
     user = models.ForeignKey(
         to=User,
         on_delete=models.CASCADE,
@@ -165,6 +167,8 @@ class Favorite(models.Model):
 
 
 class BuyList(models.Model):
+    """Модель для добавления в БД рецептов для покупки пользователями."""
+
     user = models.ForeignKey(
         to=User,
         on_delete=models.CASCADE,
