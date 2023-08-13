@@ -45,7 +45,8 @@ class SubscriptionViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        return User.objects.filter(subscribed__user=self.request.user)
+        return User.objects.filter(
+            subscribed__user=self.request.user).prefetch_related('recipes')
 
     def get_serializer_context(self):
         context = super().get_serializer_context()

@@ -21,7 +21,7 @@ from .serializers import (IngredientsSerializer, TagSerializer,
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
-    filter_backends = (IngredientsSearch,)
+    filter_backends = (IngredientsSearch, )
     pagination_class = None
 
 
@@ -32,7 +32,8 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.select_related('author').prefetch_related(
+        'tag', 'ingredient').all()
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend, OrderingFilter, CustomFilterBackend)

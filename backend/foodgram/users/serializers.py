@@ -5,6 +5,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from .models import Subscription
+from recipes.models import Recipe
 
 User = get_user_model()
 
@@ -34,6 +35,14 @@ class CustomUserSerializer(UserSerializer):
         return Subscription.objects.filter(user=user, author=obj).exists()
 
 
+class RecipeRepresentateForSuscribe(serializers.ModelSerializer):
+    """Сериализатор для представления отдельных данных о рецепте."""
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
 class SubscriptionSerializer(serializers.ModelSerializer):
     """
     Сериализатор данных из модели User c добавлением
@@ -56,12 +65,12 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return obj.subscribed.filter(user=self.context['user']).exists()
 
     def get_recipes(self, obj):
-        queryset = obj.recipes.all().values('id', 'name', 'image',
-                                            'cooking_time')
         recipes_limit = self.context.get('recipes_limit')
+        queryset = Recipe.objects.filter(author=obj)
+        recipes = RecipeRepresentateForSuscribe(queryset, many=True).data
         if recipes_limit is not None:
-            return queryset[:recipes_limit]
-        return queryset
+            return recipes[:recipes_limit]
+        return recipes
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()

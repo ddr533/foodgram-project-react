@@ -7,13 +7,12 @@ from .models import Recipe
 
 
 class IngredientsSearch(filters.BaseFilterBackend):
+    """Поиск по вхождени. в начало имени ингредиента."""
+
     def filter_queryset(self, request, queryset, view):
-        search_query = request.query_params.get('search', None)
+        search_query = request.query_params.get('name', None)
         if search_query:
-            queryset = queryset.filter(
-                Q(name__istartswith=search_query) |
-                Q(name__icontains=search_query)
-            )
+            queryset = queryset.filter(name__istartswith=search_query)
         return queryset
 
 
@@ -29,7 +28,7 @@ class RecipeFilter(django_filters.FilterSet):
 
     def filter_tags(self, queryset, name, value):
         tags = self.request.GET.getlist('tags')
-        return queryset.filter(tag__slug__in=tags)
+        return queryset.filter(tag__slug__in=tags).distinct()
 
 
 class CustomFilterBackend(filters.BaseFilterBackend):
