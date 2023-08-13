@@ -130,7 +130,7 @@ DJOSER = {
     },
 }
 
-
+# Настройки библиотеки для тестирования скорости запросов в БД
 SILKY_PYTHON_PROFILER = True
 SILKY_PYTHON_PROFILER_BINARY = True
 
