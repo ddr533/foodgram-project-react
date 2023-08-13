@@ -10,3 +10,4 @@ urlpatterns = [
     path('api/auth/', include('djoser.urls.authtoken'), name='djoser_token'),
 
 ]
+urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]

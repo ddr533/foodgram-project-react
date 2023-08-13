@@ -24,8 +24,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework.authtoken',
+    'silk',
     'rest_framework',
     'django_filters',
+
     'djoser',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
@@ -39,7 +41,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    'silk.middleware.SilkyMiddleware'
 ]
 
 ROOT_URLCONF = 'foodgram.urls'
@@ -127,3 +129,8 @@ DJOSER = {
         'user': ['users.permissions.IsOwnerOrReadOnly'],
     },
 }
+
+
+SILKY_PYTHON_PROFILER = True
+SILKY_PYTHON_PROFILER_BINARY = True
+
