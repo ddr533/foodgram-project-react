@@ -8,8 +8,7 @@ urlpatterns = [
     path('api/', include('recipes.urls', namespace='recipes')),
     path('api/users/', include('users.urls', namespace='users')),
     path('api/auth/', include('djoser.urls.authtoken'), name='djoser_token'),
-
 ]
 
 # Маршрут библиотеки для тестирования скорости запросов в БД.
-urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]
+# urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]

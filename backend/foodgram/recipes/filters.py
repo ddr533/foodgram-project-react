@@ -7,7 +7,7 @@ from .models import Recipe
 
 
 class IngredientsSearch(filters.BaseFilterBackend):
-    """Поиск по вхождени. в начало имени ингредиента."""
+    """Поиск по вхождению в начало имени ингредиента."""
 
     def filter_queryset(self, request, queryset, view):
         search_query = request.query_params.get('name', None)
@@ -52,7 +52,7 @@ class CustomFilterBackend(filters.BaseFilterBackend):
         if is_in_shopping_cart is not None:
             if not user.is_authenticated:
                 raise PermissionDenied(
-                    'Для просмотра карзины авторизируйтесь.')
+                    'Для просмотра корзины авторизируйтесь.')
             is_in_shopping_cart = bool(int(is_in_shopping_cart))
             if is_in_shopping_cart:
                 queryset = queryset.filter(buylist__user=user)

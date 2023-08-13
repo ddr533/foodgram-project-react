@@ -27,7 +27,6 @@ INSTALLED_APPS = [
     'silk',
     'rest_framework',
     'django_filters',
-
     'djoser',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
