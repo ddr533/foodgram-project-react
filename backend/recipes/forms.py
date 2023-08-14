@@ -1,10 +1,11 @@
 from django import forms
+from rest_framework.exceptions import ValidationError
 
 from .models import Recipe
 from .exceptions import (DuplicateIngredientException,
                          MissingIngredientException,
                          MissingSelectionException,
-                         MissingAmountException)
+                         MissingAmountException, DuplicateRecipeException)
 
 
 
@@ -12,6 +13,14 @@ class RecipeForm(forms.ModelForm):
     class Meta:
         model = Recipe
         fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        author = cleaned_data.get('author')
+        recipe_name = self.cleaned_data['name']
+        print(author, recipe_name)
+        if Recipe.objects.filter(author=author, name=recipe_name).exists():
+            raise DuplicateRecipeException()
 
 
 class RecipeIngredientInlineFormset(forms.models.BaseInlineFormSet):

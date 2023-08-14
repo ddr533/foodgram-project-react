@@ -31,8 +31,8 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингридиент'
-        verbose_name_plural = 'Ингридиенты'
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
         ordering = ('id', 'name')
 
     def __str__(self):
@@ -133,7 +133,7 @@ class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        verbose_name='Ингридиент'
+        verbose_name='Ингредиент'
     )
     recipe = models.ForeignKey(
         Recipe,
@@ -149,8 +149,8 @@ class IngredientRecipe(models.Model):
 
     class Meta:
         ordering = ('recipe', 'id',)
-        verbose_name = 'Ингридиенты рецепта'
-        verbose_name_plural = 'Ингридиенты рецептов'
+        verbose_name = 'Ингредиенты рецепта'
+        verbose_name_plural = 'Ингредиенты рецептов'
 
 
 class Favorite(models.Model):

@@ -1,6 +1,11 @@
 from django import forms
 
 
+class DuplicateRecipeException(forms.ValidationError):
+    def __init__(self):
+        super().__init__('Рецепт с таким именем уже есть у автора.')
+
+
 class DuplicateIngredientException(forms.ValidationError):
     def __init__(self, ingredient_name):
         super().__init__(f'Этот ингредиент уже есть'
