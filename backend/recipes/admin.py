@@ -1,6 +1,8 @@
 from django.contrib import admin
+from django import forms
+from rest_framework.exceptions import ValidationError
 
-from .forms import RecipeForm
+from .forms import RecipeForm, RecipeIngredientInlineFormset
 from .models import (BuyList, Favorite, Ingredient, IngredientRecipe, Recipe,
                      Tag)
 
@@ -22,6 +24,7 @@ class AdminTag(admin.ModelAdmin):
 class AdminIngredientRecipeInline(admin.TabularInline):
     model = IngredientRecipe
     extra = 1
+    formset = RecipeIngredientInlineFormset
 
 
 class AdminRecipe(admin.ModelAdmin):
