@@ -5,7 +5,7 @@ python python manage.py parse_json 'path'
 path - путь до файла *.json
 Если данные находятся в папке data на две директории выше,
 то команда будет такой:
-python manage.py parse_json ../../data/ingredients.json
+python manage.py parse_json ../data/ingredients.json
 """
 
 import json

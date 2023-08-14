@@ -4,7 +4,7 @@ volumes:
   pg_data:
   static:
   media:
-  data:  
+  data:
 services:
   db:
     image: postgres:13.10
@@ -12,7 +12,7 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
   backend:
-    build: ./backend/foodgram/
+    build: ./backend/
     env_file: .env
     depends_on:
       - db
