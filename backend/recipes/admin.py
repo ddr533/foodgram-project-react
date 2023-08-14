@@ -1,6 +1,4 @@
 from django.contrib import admin
-from django import forms
-from rest_framework.exceptions import ValidationError
 
 from .forms import RecipeForm, RecipeIngredientInlineFormset
 from .models import (BuyList, Favorite, Ingredient, IngredientRecipe, Recipe,
@@ -42,11 +40,6 @@ class AdminRecipe(admin.ModelAdmin):
                                               ' в избранное')
 
 
-class AdminIngredientRecipe(admin.ModelAdmin):
-    list_display = ('id', 'recipe', 'ingredient', 'amount')
-    list_editable = ('ingredient', 'amount')
-
-
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_editable = ('user', 'recipe')
@@ -60,6 +53,5 @@ class BuyListAdmin(admin.ModelAdmin):
 admin.site.register(Ingredient, AdminIngredient)
 admin.site.register(Tag, AdminTag)
 admin.site.register(Recipe, AdminRecipe)
-admin.site.register(IngredientRecipe, AdminIngredientRecipe)
 admin.site.register(Favorite, FavoriteAdmin)
 admin.site.register(BuyList, BuyListAdmin)
