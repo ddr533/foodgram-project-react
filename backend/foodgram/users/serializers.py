@@ -1,13 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from djoser.serializers import UserCreateSerializer, UserSerializer
+from recipes.models import Recipe
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from .models import Subscription
-from recipes.models import Recipe
 
 User = get_user_model()
+
 
 class CustomUserCreateSerializer(UserCreateSerializer):
     """Сериализатор для создания объекта модели User."""

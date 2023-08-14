@@ -1,7 +1,8 @@
 from django.contrib import admin
-from .models import (Ingredient, Tag, Recipe, IngredientRecipe, Favorite,
-                     BuyList)
+
 from .forms import RecipeForm
+from .models import (BuyList, Favorite, Ingredient, IngredientRecipe, Recipe,
+                     Tag)
 
 
 class AdminIngredient(admin.ModelAdmin):
@@ -34,7 +35,8 @@ class AdminRecipe(admin.ModelAdmin):
     def total_favorite_count(self, obj):
         return obj.favorites.count()
 
-    total_favorite_count.short_description = 'Количество добавлений в избранное'
+    total_favorite_count.short_description = ('Количество добавлений'
+                                              ' в избранное')
 
 
 class AdminIngredientRecipe(admin.ModelAdmin):

@@ -51,7 +51,7 @@ class UserRegistrationTest(TestCase):
     def test_anonymous_user_cant_register(self):
         """Пользователь не может зарегистроваться с некорректными данными."""
         url = reverse('users:user-list')
-        data = {'username': 'notuser', 'password': 'testpassword',}
+        data = {'username': 'notuser', 'password': 'testpassword'}
         self.client.post(url, data)
         self.assertFalse(User.objects.filter(username='notuser').exists())
 

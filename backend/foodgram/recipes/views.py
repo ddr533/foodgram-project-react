@@ -2,20 +2,21 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, viewsets, status
+from rest_framework import mixins, status, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .filters import CustomFilterBackend, IngredientsSearch, RecipeFilter
+from .models import (BuyList, Favorite, Ingredient, IngredientRecipe, Recipe,
+                     Tag)
 from .permissions import IsAuthorOrReadOnly
+from .serializers import (BuyListSerializer, FavoriteSerializer,
+                          IngredientsSerializer, RecipeSerializer,
+                          TagSerializer)
 from .utils import get_ingredients_for_download
-from .models import Ingredient, Tag, Recipe, Favorite, BuyList, IngredientRecipe
-from .filters import IngredientsSearch, RecipeFilter, CustomFilterBackend
-from .serializers import (IngredientsSerializer, TagSerializer,
-                          RecipeSerializer, FavoriteSerializer,
-                          BuyListSerializer)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -36,7 +37,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         'tag', 'ingredient').all()
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
-    filter_backends = (DjangoFilterBackend, OrderingFilter, CustomFilterBackend)
+    filter_backends = (DjangoFilterBackend, OrderingFilter,
+                       CustomFilterBackend)
     filterset_class = RecipeFilter
     ordering_fields = ('pub_date')
     ordering = ('-pub_date',)
@@ -46,7 +48,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 
 class BaseAddRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
-                        viewsets.GenericViewSet):
+                           viewsets.GenericViewSet):
     """
     Базовый класс представлений для удаления и добавления
     рецептов в корзину, в избранное и т.п.

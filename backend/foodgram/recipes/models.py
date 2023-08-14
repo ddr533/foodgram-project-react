@@ -3,7 +3,6 @@ from django.core.validators import MaxValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
-
 User = get_user_model()
 
 CHARS_MAX_LEN = 150

@@ -1,8 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models import CheckConstraint, Q, F, UniqueConstraint
-
+from django.db.models import CheckConstraint, F, Q, UniqueConstraint
 
 EMAIL_MAX_LEN = 254
 CHARS_MAX_LEN = 150
@@ -22,7 +21,7 @@ class User(AbstractUser):
         blank=False,
         verbose_name='Никнейм',
         validators=[
-            RegexValidator(regex=r'^[\w.@+-]+$',message=VALIDATE_USERNAME_MSG)
+            RegexValidator(regex=r'^[\w.@+-]+$', message=VALIDATE_USERNAME_MSG)
         ],
     )
     first_name = models.CharField(
@@ -49,7 +48,7 @@ class User(AbstractUser):
 
 
 class Subscription(models.Model):
-    """Модель для добавления в БД подписок пользователей на авторов рецептов."""
+    """Модель для добавления в БД подписок пользователей на авторов."""
 
     user = models.ForeignKey(
         to=User,

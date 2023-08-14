@@ -133,3 +133,4 @@ dmypy.json
 .idea
 /backend/foodgram/media/
 /frontend/node_modules/
+/backend/foodgram/silk/

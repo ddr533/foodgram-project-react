@@ -1,17 +1,16 @@
 from django.contrib.auth import get_user_model
 from djoser.views import UserViewSet
-from rest_framework import permissions, viewsets, status
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
 from rest_framework.response import Response
-from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
-                                   DestroyModelMixin)
 
 from .models import Subscription
-from .serializers import (CustomUserSerializer,
-                          SubscriptionSerializer, CustomUserCreateSerializer)
-
+from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
+                          SubscriptionSerializer)
 
 User = get_user_model()
 

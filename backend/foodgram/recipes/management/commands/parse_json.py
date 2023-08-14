@@ -32,7 +32,7 @@ class Command(BaseCommand):
         # Создание списка объектов модели для bulk_create
         objects_to_create = [
             Ingredient(name=item['name'],
-                        measurement_unit=item['measurement_unit'])
+                       measurement_unit=item['measurement_unit'])
             for item in data
         ]
         Ingredient.objects.bulk_create(objects_to_create)

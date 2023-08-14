@@ -4,15 +4,16 @@ import shutil
 import tempfile
 from io import BytesIO
 
-from PIL import Image
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import TestCase
-from django.test import override_settings
+from django.test import TestCase, override_settings
+from PIL import Image
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
-from .models import Recipe, Ingredient, Tag, IngredientRecipe, Favorite, BuyList
+
+from .models import (BuyList, Favorite, Ingredient, IngredientRecipe, Recipe,
+                     Tag)
 
 User = get_user_model()
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -41,13 +42,16 @@ class RecipeTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.url_list = reverse('recipes:recipes-list')
-        cls.author = User.objects.create_user(username='author',
-                                     email='user1@example.com',
-                                     password='password1')
-        cls.ingredient1 = Ingredient.objects.create(name='Ингредиент 1',
-                                                measurement_unit='г')
-        cls.ingredient2 = Ingredient.objects.create(name='Ингредиент 2',
-                                                measurement_unit='мл')
+        cls.author = User.objects.create_user(
+            username='author',
+            email='user1@example.com',
+            password='password1')
+        cls.ingredient1 = Ingredient.objects.create(
+            name='Ингредиент 1',
+            measurement_unit='г')
+        cls.ingredient2 = Ingredient.objects.create(
+            name='Ингредиент 2',
+            measurement_unit='мл')
         cls.tag1 = Tag.objects.create(name='Т1', color='#FF0000', slug='tag-1')
         cls.tag2 = Tag.objects.create(name='Т2', color='#00FF00', slug='tag-2')
         cls.recipe = Recipe.objects.create(
@@ -69,12 +73,12 @@ class RecipeTests(TestCase):
             amount=200
         )
         cls.url_detail = reverse('recipes:recipes-detail',
-                                  kwargs={'pk': cls.recipe.id})
+                                 kwargs={'pk': cls.recipe.id})
         cls.image = get_image_base64()
         cls.buy_recipe_url = reverse('recipes:shopping_cart',
-                                  kwargs={'recipe_id': cls.recipe.id})
+                                     kwargs={'recipe_id': cls.recipe.id})
         cls.favorite_recipe_url = reverse('recipes:favorite',
-                                  kwargs={'recipe_id': cls.recipe.id})
+                                          kwargs={'recipe_id': cls.recipe.id})
 
     def setUp(self):
         self.anon = APIClient()

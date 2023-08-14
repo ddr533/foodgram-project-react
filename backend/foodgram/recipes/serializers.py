@@ -5,9 +5,10 @@ from django.core.files.base import ContentFile
 from django.db.models import F, Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
-from .models import Ingredient, Tag, Recipe, IngredientRecipe, Favorite, BuyList
 from users.serializers import CustomUserSerializer
+
+from .models import (BuyList, Favorite, Ingredient, IngredientRecipe, Recipe,
+                     Tag)
 
 
 class Base64ImageField(serializers.ImageField):
@@ -200,6 +201,7 @@ class FavoriteSerializer(BaseAddRecipeSerializer):
 
     class Meta(BaseAddRecipeSerializer.Meta):
         model = Favorite
+
 
 class BuyListSerializer(BaseAddRecipeSerializer):
     """Сериализатор для добавления рецептов в корзину."""

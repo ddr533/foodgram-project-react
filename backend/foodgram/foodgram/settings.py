@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -129,7 +130,7 @@ DJOSER = {
     },
 }
 
-# Настройки библиотеки для тестирования скорости запросов в БД
+# Настройки библиотеки для тестирования скорости запросов в БД в режиме отладки
 SILKY_PYTHON_PROFILER = True
 SILKY_PYTHON_PROFILER_BINARY = True
-
+SILKY_PYTHON_PROFILER_RESULT_PATH = BASE_DIR / 'silk'

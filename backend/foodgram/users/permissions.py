@@ -1,5 +1,5 @@
 from rest_framework.exceptions import MethodNotAllowed
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsOwnerOrReadOnly(BasePermission):
@@ -13,7 +13,6 @@ class IsOwnerOrReadOnly(BasePermission):
         elif request.method in SAFE_METHODS:
             return True
         raise MethodNotAllowed(method=request.method)
-
 
     def has_object_permission(self, request, view, obj):
         if view.action == 'me':
