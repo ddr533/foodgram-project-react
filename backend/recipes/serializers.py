@@ -112,26 +112,26 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         attrs = super().validate(attrs)
-        # Проверяем, что поле 'tags' не является пустым списком.
         tags = attrs.get('tag')
+        name = attrs['name']
+        author = self.context['request'].user
+        method = self.context['request'].method
+
         if not tags:
             raise serializers.ValidationError(
                 'Поле "tags" должно содержать хотя бы один элемент.')
 
-        # Проверяем, что поле 'ingredients' не является пустым списком.
         ingredients = attrs.get('recipe_ingredients')
         if not ingredients:
             raise serializers.ValidationError(
                 'Поле "ingredients" не должно быть пустым списком.'
             )
-        # Проверяем, что у автора нет такого же рецепта.
-        name = attrs['name']
-        author = self.context['request'].user
-        method = self.context['request'].method
+
         if (method == 'POST' and Recipe.objects.filter(
-                name=name, author=author).exists()):
+                name=name, author=author, tag__in=tags).exists()):
             raise ValidationError(
-                'У вас уже есть рецепт с таким названием.')
+                'У вас уже есть рецепт с таким же названием и тегами.')
+
         return attrs
 
     def to_representation(self, instance):

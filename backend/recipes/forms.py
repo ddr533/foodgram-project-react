@@ -21,7 +21,6 @@ class RecipeForm(forms.ModelForm):
         tags = self.cleaned_data['tag']
         recipe_id = self.instance.id
 
-
         duplicate = Recipe.objects.filter(
                 author=author,
                 name=recipe_name,
