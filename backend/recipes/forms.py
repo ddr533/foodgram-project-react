@@ -1,12 +1,20 @@
+import re
+
 from django import forms
 from rest_framework.exceptions import ValidationError
 
-from .models import Recipe
+from .models import Recipe, Tag
 from .exceptions import (DuplicateIngredientException,
                          MissingIngredientException,
                          MissingSelectionException,
                          MissingAmountException, DuplicateRecipeException)
 
+
+class TagForm(forms.ModelForm):
+    class Meta:
+        model = Tag
+        fields = ('name', 'slug', 'color')
+        widgets = {'color': forms.TextInput(attrs={'type': 'color'}),}
 
 
 class RecipeForm(forms.ModelForm):

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .forms import RecipeForm, RecipeIngredientInlineFormset
+from .forms import RecipeForm, RecipeIngredientInlineFormset, TagForm
 from .models import (BuyList, Favorite, Ingredient, IngredientRecipe, Recipe,
                      Tag)
 
@@ -13,6 +13,7 @@ class AdminIngredient(admin.ModelAdmin):
 
 
 class AdminTag(admin.ModelAdmin):
+    form = TagForm
     list_display = ('id', 'name', 'color', 'slug')
     list_editable = ('name', 'color', 'slug')
     list_filter = ('name',)

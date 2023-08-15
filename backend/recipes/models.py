@@ -1,19 +1,20 @@
+import re
+
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 from rest_framework.exceptions import ValidationError
 
+from .constants import *
+
 User = get_user_model()
 
-CHARS_MAX_LEN = 150
-RECIPE_NAME_MAX_LEN = 200
-RECIPE_TEXT_MAX_LEN = 5000
-MEASUREMENT_UNIT_MAX_LEN = 20
-HEX_COLOR_MAX_LEN = 7
-MAX_COOKING_TIME = 1000
-MAX_AMOUNT_INGREDIENT = 3000
-STR_REPR_LEN = 20
+
+def validate_hex_color(value):
+    pattern = r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'
+    if not re.match(pattern, value):
+        raise ValidationError('Некорректный формат HEX-цвета')
 
 
 class Ingredient(models.Model):
@@ -35,6 +36,13 @@ class Ingredient(models.Model):
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
         ordering = ('id', 'name')
+        constraints = [UniqueConstraint(
+                fields=('name', 'measurement_unit'),
+                name='unique_ingredient_measurement_unit',
+                violation_error_message=
+                'Запись ингредиент-единица_измерения уже есть. '
+            )
+        ]
 
     def __str__(self):
         return self.name[:STR_REPR_LEN]
@@ -51,8 +59,8 @@ class Tag(models.Model):
         verbose_name='Название'
     )
     color = models.CharField(
-        max_length=HEX_COLOR_MAX_LEN,
         blank=False,
+        validators=[validate_hex_color],
         verbose_name='Цвет(HEX)'
     )
     slug = models.SlugField(
