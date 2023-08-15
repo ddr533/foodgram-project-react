@@ -2,6 +2,7 @@ import base64
 import binascii
 
 from django.core.files.base import ContentFile
+from django.db import transaction
 from django.db.models import F, Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -70,16 +71,22 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
 
+    def _create_ingredients(self, recipe, ingredients_data):
+        ingredients = [
+            IngredientRecipe(recipe=recipe,
+                             ingredient=ingredient_data['ingredient'],
+                             amount=ingredient_data['amount'])
+            for ingredient_data in ingredients_data
+        ]
+        IngredientRecipe.objects.bulk_create(ingredients)
+
     def create(self, validated_data):
         ingredients_data = validated_data.pop('recipe_ingredients')
         tags = validated_data.pop('tag')
-        recipe = Recipe.objects.create(**validated_data)
-        for ingredient_data in ingredients_data:
-            ingredient = ingredient_data['ingredient']
-            amount = ingredient_data['amount']
-            IngredientRecipe.objects.create(
-                recipe=recipe, ingredient=ingredient, amount=amount)
-        recipe.tag.set(tags)
+        with transaction.atomic():
+            recipe = Recipe.objects.create(**validated_data)
+            self._create_ingredients(recipe, ingredients_data)
+            recipe.tag.set(tags)
         return recipe
 
     def update(self, instance, validated_data):
@@ -92,12 +99,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.image = validated_data.get('image', instance.image)
         instance.save()
         instance.tag.set(tags)
-        instance.recipe_ingredients.all().delete()
-        for ingredient_data in ingredients_data:
-            ingredient = ingredient_data['ingredient']
-            amount = ingredient_data['amount']
-            IngredientRecipe.objects.create(
-                recipe=instance, ingredient=ingredient, amount=amount)
+        with transaction.atomic():
+            instance.recipe_ingredients.all().delete()
+            self._create_ingredients(instance, ingredients_data)
         return instance
 
     def validate(self, attrs):
@@ -120,7 +124,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if (method == 'POST' and Recipe.objects.filter(
                 name=name, author=author, tag__in=tags).exists()):
             raise ValidationError(
-                'У вас уже есть рецепт с таким же названием и тегами.')
+                'У вас уже есть рецепт с таким названием и тегами.')
 
         return attrs
 
@@ -134,7 +138,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             recipe=instance).annotate(
             name=F('ingredient__name'),
             measurement_unit=F('ingredient__measurement_unit')
-        ).values('id', 'name', 'measurement_unit', 'amount')
+        ).values('ingredient', 'name', 'measurement_unit', 'amount')
         representation['ingredients'] = annotated_ingredients
         return representation
 
