@@ -67,10 +67,16 @@ class Subscription(models.Model):
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
         constraints = [
-            CheckConstraint(check=~Q(user=F('author')),
-                            name='user!=author'),
-            UniqueConstraint(fields=('user', 'author'),
-                             name='unique_name_and_author')
+            CheckConstraint(
+                check=~Q(user=F('author')),
+                name='user!=author',
+                violation_error_message='Нельзя подписываться на себя.'
+            ),
+            UniqueConstraint(
+                fields=('user', 'author'),
+                name='unique_name_and_author',
+                violation_error_message='Эта подписка уже есть. '
+            )
         ]
 
     def __str__(self):
