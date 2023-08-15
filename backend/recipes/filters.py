@@ -39,23 +39,13 @@ class CustomFilterBackend(filters.BaseFilterBackend):
         user = request.user
 
         if is_favorite is not None:
-            if not user.is_authenticated:
-                raise PermissionDenied(
-                    'Для просмотра избранного авторизируйтесь.')
             is_favorite = bool(int(is_favorite))
             if is_favorite:
                 queryset = queryset.filter(favorites__user=user)
-            else:
-                queryset = queryset.exclude(favorites__user=user)
 
         if is_in_shopping_cart is not None:
-            if not user.is_authenticated:
-                raise PermissionDenied(
-                    'Для просмотра корзины авторизируйтесь.')
             is_in_shopping_cart = bool(int(is_in_shopping_cart))
             if is_in_shopping_cart:
                 queryset = queryset.filter(buylist__user=user)
-            else:
-                queryset = queryset.exclude(buylist__user=user)
 
         return queryset
