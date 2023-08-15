@@ -60,26 +60,15 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer(read_only=True)
     ingredients = RecipeIngredientSerializer(
         many=True, source='recipe_ingredients')
-    is_favorited = serializers.BooleanField(read_only=True)
-    is_in_shopping_cart = serializers.BooleanField(read_only=True)
+    is_favorited = serializers.BooleanField(read_only=True, default=False)
+    is_in_shopping_cart = serializers.BooleanField(read_only=True,
+                                                   default=False)
 
     class Meta:
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
-
-    # def get_is_favorited(self, obj):
-    #     request = self.context.get('request')
-    #     if request and request.user.is_authenticated:
-    #         return obj.favorite_set.filter(user=request.user).exists()
-    #     return False
-    #
-    # def get_is_in_shopping_cart(self, obj):
-    #     request = self.context.get('request')
-    #     if request and request.user.is_authenticated:
-    #         return obj.buylist_set.filter(user=request.user).exists()
-    #     return False
 
     def create(self, validated_data):
         ingredients_data = validated_data.pop('recipe_ingredients')
