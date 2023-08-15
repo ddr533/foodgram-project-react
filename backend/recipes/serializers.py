@@ -136,9 +136,12 @@ class RecipeSerializer(serializers.ModelSerializer):
         representation['tags'] = TagSerializer(tags, many=True).data
         annotated_ingredients = IngredientRecipe.objects.filter(
             recipe=instance).annotate(
+            id_ingredient=F('ingredient'),
             name=F('ingredient__name'),
             measurement_unit=F('ingredient__measurement_unit')
-        ).values('ingredient', 'name', 'measurement_unit', 'amount')
+        ).values('id_ingredient', 'name', 'measurement_unit', 'amount')
+        for ingredient in annotated_ingredients:
+            ingredient['id'] = ingredient.pop('id_ingredient')
         representation['ingredients'] = annotated_ingredients
         return representation
 
