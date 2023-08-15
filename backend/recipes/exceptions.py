@@ -2,8 +2,11 @@ from django import forms
 
 
 class DuplicateRecipeException(forms.ValidationError):
-    def __init__(self):
-        super().__init__('Рецепт с таким именем уже есть у автора.')
+    def __init__(self, duplicate):
+        tag_str = ', '.join(tag.name for tag in duplicate.tag.all())
+        super().__init__(
+            f'У данного автора есть похожий рецепт'
+            f' Название: {duplicate.name}. Теги: {tag_str}')
 
 
 class DuplicateIngredientException(forms.ValidationError):

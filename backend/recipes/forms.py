@@ -18,9 +18,16 @@ class RecipeForm(forms.ModelForm):
         cleaned_data = super().clean()
         author = cleaned_data.get('author')
         recipe_name = self.cleaned_data['name']
-        print(author, recipe_name)
-        if Recipe.objects.filter(author=author, name=recipe_name).exists():
-            raise DuplicateRecipeException()
+        tags = self.cleaned_data['tag']
+        recipe_id = self.instance.id
+
+
+        duplicate = Recipe.objects.filter(
+                author=author,
+                name=recipe_name,
+                tag__in=tags).exclude(id=recipe_id).first()
+        if duplicate:
+            raise DuplicateRecipeException(duplicate=duplicate)
 
 
 class RecipeIngredientInlineFormset(forms.models.BaseInlineFormSet):
