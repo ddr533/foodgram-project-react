@@ -146,27 +146,27 @@ class RecipeTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Recipe.objects.get(id=self.recipe.id).name, 'Patchme')
 
-    def test_authenticated_user_can_add_recipe_to_favorites(self):
+    def test_authenticated_user_can_add_recipe_to_favorite(self):
         """Авторизованный пользователь может добавить рецепт в избранное."""
         response = self.client.post(self.favorite_recipe_url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(self.author.favorite_recipes.count(), 1)
-        self.assertEqual(self.author.favorite_recipes.first().recipe,
+        self.assertEqual(self.author.favorite_set.count(), 1)
+        self.assertEqual(self.author.favorite_set.first().recipe,
                          self.recipe)
 
-    def test_authenticated_user_can_remove_recipe_from_favorites(self):
+    def test_authenticated_user_can_remove_recipe_from_favorite(self):
         """Авторизованный пользователь может удалить рецепт из избранного."""
         Favorite.objects.create(user=self.author, recipe=self.recipe)
         response = self.client.delete(self.favorite_recipe_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(self.author.favorite_recipes.count(), 0)
+        self.assertEqual(self.author.favorite_set.count(), 0)
 
     def test_authenticated_user_can_add_recipe_to_shopping_cart(self):
         """Авторизованный пользователь может добавить рецепт в корзину."""
         response = self.client.post(self.buy_recipe_url)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(self.author.buylist_recipes.count(), 1)
-        self.assertEqual(self.author.buylist_recipes.first().recipe,
+        self.assertEqual(self.author.buylist_set.count(), 1)
+        self.assertEqual(self.author.buylist_set.first().recipe,
                          self.recipe)
 
     def test_authenticated_user_can_remove_recipe_from_shopping_cart(self):
@@ -174,9 +174,9 @@ class RecipeTests(TestCase):
         BuyList.objects.create(user=self.author, recipe=self.recipe)
         response = self.client.delete(self.buy_recipe_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(self.author.buylist_recipes.count(), 0)
+        self.assertEqual(self.author.buylist_set.count(), 0)
 
-    def test_anonymous_user_cannot_add_recipe_to_favorites(self):
+    def test_anonymous_user_cannot_add_recipe_to_favorite(self):
         """Аноним не может добавить рецепт в избранное."""
         response = self.anon.post(self.favorite_recipe_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

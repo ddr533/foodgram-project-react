@@ -28,3 +28,8 @@ class MissingIngredientException(forms.ValidationError):
 class MissingSelectionException(forms.ValidationError):
     def __init__(self):
         super().__init__('Выберите хотя бы 1 ингредиент и его количество.')
+
+
+class DuplicateTagException(forms.ValidationError):
+    def __init__(self):
+        super().__init__(f'Этот рецепт уже есть в корзине.')

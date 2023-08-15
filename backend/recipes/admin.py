@@ -7,7 +7,6 @@ from .models import (BuyList, Favorite, Ingredient, IngredientRecipe, Recipe,
 
 class AdminIngredient(admin.ModelAdmin):
     list_display = ('id', 'name', 'measurement_unit')
-    list_editable = ('name', 'measurement_unit')
     search_fields = ('measurement_unit',)
     list_filter = ('name',)
 
@@ -15,7 +14,6 @@ class AdminIngredient(admin.ModelAdmin):
 class AdminTag(admin.ModelAdmin):
     form = TagForm
     list_display = ('id', 'name', 'color', 'slug')
-    list_editable = ('name', 'color', 'slug')
     list_filter = ('name',)
     prepopulated_fields = {'slug': ('name',)}
 
@@ -30,12 +28,11 @@ class AdminRecipe(admin.ModelAdmin):
     form = RecipeForm
     inlines = [AdminIngredientRecipeInline]
     list_display = ('id', 'name', 'author')
-    list_editable = ('name', 'author')
     list_filter = ('name', 'author', 'tag')
     readonly_fields = ('id', 'total_favorite_count',)
 
     def total_favorite_count(self, obj):
-        return obj.favorites.count()
+        return obj.favorite.count()
 
     total_favorite_count.short_description = ('Количество добавлений'
                                               ' в избранное')
@@ -49,6 +46,7 @@ class FavoriteAdmin(admin.ModelAdmin):
 class BuyListAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'recipe')
     list_editable = ('user', 'recipe')
+
 
 
 admin.site.register(Ingredient, AdminIngredient)
