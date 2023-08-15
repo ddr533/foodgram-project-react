@@ -5,6 +5,7 @@ from django.core.files.base import ContentFile
 from django.db.models import F, Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
 from users.serializers import CustomUserSerializer
 
 from .models import (BuyList, Favorite, Ingredient, IngredientRecipe, Recipe,
@@ -59,8 +60,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer(read_only=True)
     ingredients = RecipeIngredientSerializer(
         many=True, source='recipe_ingredients')
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.BooleanField(read_only=True)
+    is_in_shopping_cart = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Recipe
@@ -68,17 +69,17 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
 
-    def get_is_favorited(self, obj):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return obj.favorite_set.filter(user=request.user).exists()
-        return False
-
-    def get_is_in_shopping_cart(self, obj):
-        request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return obj.buylist_set.filter(user=request.user).exists()
-        return False
+    # def get_is_favorited(self, obj):
+    #     request = self.context.get('request')
+    #     if request and request.user.is_authenticated:
+    #         return obj.favorite_set.filter(user=request.user).exists()
+    #     return False
+    #
+    # def get_is_in_shopping_cart(self, obj):
+    #     request = self.context.get('request')
+    #     if request and request.user.is_authenticated:
+    #         return obj.buylist_set.filter(user=request.user).exists()
+    #     return False
 
     def create(self, validated_data):
         ingredients_data = validated_data.pop('recipe_ingredients')

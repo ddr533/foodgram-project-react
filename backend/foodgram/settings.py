@@ -131,4 +131,4 @@ DJOSER = {
 # Настройки библиотеки для тестирования скорости запросов в БД в режиме отладки
 SILKY_PYTHON_PROFILER = True
 SILKY_PYTHON_PROFILER_BINARY = True
-SILKY_PYTHON_PROFILER_RESULT_PATH = BASE_DIR / 'silk'
+# SILKY_PYTHON_PROFILER_RESULT_PATH = BASE_DIR / 'silk'

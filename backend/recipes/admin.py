@@ -32,7 +32,7 @@ class AdminRecipe(admin.ModelAdmin):
     readonly_fields = ('id', 'total_favorite_count',)
 
     def total_favorite_count(self, obj):
-        return obj.favorite.count()
+        return obj.favorite_set.count()
 
     total_favorite_count.short_description = ('Количество добавлений'
                                               ' в избранное')

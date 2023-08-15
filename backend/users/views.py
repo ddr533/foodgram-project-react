@@ -64,13 +64,11 @@ class SubscriptionViewSet(ListModelMixin, CreateModelMixin, DestroyModelMixin,
         serializer.save(user=user, author=author)
 
     def destroy(self, request, author_id):
-        # Если автора нет в БД, то вызываем ошибку 404
         author = get_object_or_404(User, id=author_id)
         try:
-            instance = Subscription.objects.get(user=self.request.user,
-                                                author=author)
+            instance = get_object_or_404(Subscription, user=self.request.user,
+                                         author=author)
         except Exception:
-            # Если нет подписки и пр.,то вызываем ошибку 400
             raise ValidationError()
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

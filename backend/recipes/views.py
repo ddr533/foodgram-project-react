@@ -1,4 +1,5 @@
-from django.db.models import Sum
+from django.core.cache import cache
+from django.db.models import Sum, OuterRef, Exists
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -43,6 +44,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
     ordering_fields = ('pub_date')
     ordering = ('-pub_date',)
 
+    def get_queryset(self):
+        queryset = super().get_queryset().annotate(
+            is_favorited=Exists(
+                Favorite.objects.filter(
+                    user=self.request.user,
+                    recipe_id=OuterRef('pk')
+                )
+            ),
+            is_in_shopping_cart=Exists(
+                BuyList.objects.filter(
+                    user=self.request.user,
+                    recipe_id=OuterRef('pk')
+                )
+            )
+        )
+        return queryset
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
@@ -62,16 +80,26 @@ class BaseAddRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
         context = super().get_serializer_context()
         recipe_id = self.kwargs.get('recipe_id')
         if recipe_id:
-            context['recipe'] = get_object_or_404(Recipe, id=recipe_id)
+            recipe = cache.get(f'recipe_{recipe_id}')
+            if not recipe:
+                recipe = get_object_or_404(Recipe, id=recipe_id)
+                cache.set(f'recipe_{recipe_id}', recipe, 300)
+            context['recipe'] = recipe
         return context
 
     def destroy(self, request, recipe_id):
+        # При запросе DELETE get_serializer_context не вызывается, как я понял
+        # Но добавил кеш, чтобы не ходить к Recipe дважды
         try:
             user = request.user
-            recipe = Recipe.objects.get(id=recipe_id)
-            instance = self.queryset.get(user=user, recipe=recipe)
+            recipe = cache.get(f'recipe_{recipe_id}')
+            if not recipe:
+                recipe = get_object_or_404(Recipe, id=recipe_id)
+                cache.set(f'recipe_{recipe_id}', recipe, 300)
+            instance = get_object_or_404(self.queryset, user=user,
+                                         recipe=recipe)
         except Exception:
-            raise ValidationError()
+            raise ValidationError('Такой рецепт не найден в списке.')
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

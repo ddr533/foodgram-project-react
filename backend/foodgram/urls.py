@@ -9,4 +9,4 @@ urlpatterns = [
 ]
 
 # Маршрут библиотеки для тестирования скорости запросов в БД.
-# urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]
+urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]

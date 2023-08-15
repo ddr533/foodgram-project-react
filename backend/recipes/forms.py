@@ -1,5 +1,5 @@
-from .models import Recipe, Tag
 from .exceptions import *
+from .models import Recipe, Tag
 
 
 class TagForm(forms.ModelForm):
