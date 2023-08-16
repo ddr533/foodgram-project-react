@@ -10,14 +10,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .filters import CustomFilterBackend, IngredientsSearch, RecipeFilter
-from .models import (BuyList, Favorite, Ingredient, IngredientRecipe, Recipe,
-                     Tag)
 from .permissions import IsAuthorOrReadOnly
-from .serializers import (BuyListSerializer, FavoriteSerializer,
-                          IngredientsSerializer, RecipeSerializer,
-                          TagSerializer)
 from .utils import get_ingredients_for_download
+from .filters import CustomFilterBackend, IngredientsSearch, RecipeFilter
+from .serializers import (BuyListSerializer, FavoriteSerializer, TagSerializer,
+                         IngredientsSerializer, RecipeSerializer)
+from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
+                            Recipe, Tag)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -45,6 +44,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     ordering = ('-pub_date',)
 
     def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return super().get_queryset()
+
         queryset = super().get_queryset().annotate(
             is_favorited=Exists(
                 Favorite.objects.filter(
