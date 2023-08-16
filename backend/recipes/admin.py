@@ -48,7 +48,6 @@ class BuyListAdmin(admin.ModelAdmin):
     list_editable = ('user', 'recipe')
 
 
-
 admin.site.register(Ingredient, AdminIngredient)
 admin.site.register(Tag, AdminTag)
 admin.site.register(Recipe, AdminRecipe)

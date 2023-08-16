@@ -2,9 +2,9 @@ from django.urls import include, path
 from djoser.views import UserViewSet
 from rest_framework.routers import DefaultRouter
 
-from .views import (BuyListViewSet, DownloadShoppingCart, FavoriteViewSet,
-                    IngredientViewSet, RecipeViewSet, TagViewSet,
-                    CustomUserViewSet, SubscriptionViewSet)
+from .views import (BuyListViewSet, CustomUserViewSet, DownloadShoppingCart,
+                    FavoriteViewSet, IngredientViewSet, RecipeViewSet,
+                    SubscriptionViewSet, TagViewSet)
 
 app_name = 'recipes'
 
@@ -34,4 +34,3 @@ urlpatterns = [
     path('auth/', include('djoser.urls.authtoken'), name='djoser_token'),
     path('', include(router.urls)),
 ]
-

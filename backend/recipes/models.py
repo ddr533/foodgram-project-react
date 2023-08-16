@@ -6,7 +6,9 @@ from django.db import models
 from django.db.models import UniqueConstraint
 from rest_framework.exceptions import ValidationError
 
-from .constants import *
+from .constants import (CHARS_MAX_LEN, MAX_AMOUNT_INGREDIENT, MAX_COOKING_TIME,
+                        MEASUREMENT_UNIT_MAX_LEN, RECIPE_NAME_MAX_LEN,
+                        RECIPE_TEXT_MAX_LEN, STR_REPR_LEN)
 
 User = get_user_model()
 
@@ -37,11 +39,10 @@ class Ingredient(models.Model):
         verbose_name_plural = 'Ингредиенты'
         ordering = ('id', 'name')
         constraints = [UniqueConstraint(
-                fields=('name', 'measurement_unit'),
-                name='unique_ingredient_measurement_units',
-                violation_error_message=
-                'Запись ингредиент-единица_измерения уже есть. '
-            )
+            fields=('name', 'measurement_unit'),
+            name='unique_ingredient_measurement_units',
+            violation_error_message='Запись ингредиент-ед._измерения уже есть.'
+        )
         ]
 
     def __str__(self):

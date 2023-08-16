@@ -32,4 +32,4 @@ class MissingSelectionException(forms.ValidationError):
 
 class DuplicateTagException(forms.ValidationError):
     def __init__(self):
-        super().__init__(f'Этот рецепт уже есть в корзине.')
+        super().__init__('Этот рецепт уже есть в корзине.')

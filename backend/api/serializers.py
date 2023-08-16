@@ -5,14 +5,13 @@ from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.models import F, Q
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from djoser.serializers import UserCreateSerializer, UserSerializer
 
-from users.models import Subscription
 from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
                             Recipe, Tag)
-
+from users.models import Subscription
 
 User = get_user_model()
 
@@ -193,8 +192,8 @@ class BaseAddRecipeSerializer(serializers.ModelSerializer):
         read_only_fields = ('user', 'recipe')
 
     def validate(self, attrs):
-        # Как я выяснил UniqueTogetherValidator ищет поля из тела запроса,
-        # но мы по ТЗ ничего не передаем в теле. Поэтому пришлось оставть
+        # Как я выяснил, UniqueTogetherValidator ищет поля из тела запроса,
+        # но мы по ТЗ ничего не передаем в теле. Поэтому пришлось оставить
         # метод validate на уровне сериализатора, а в моделях уже использовать
         # UniqueConstraint в Meta для валидации уникальности.
         model = self.Meta.model

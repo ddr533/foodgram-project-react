@@ -1,4 +1,8 @@
-from .exceptions import *
+from django import forms
+
+from .exceptions import (DuplicateIngredientException,
+                         DuplicateRecipeException, MissingAmountException,
+                         MissingIngredientException, MissingSelectionException)
 from .models import Recipe, Tag
 
 
@@ -6,7 +10,7 @@ class TagForm(forms.ModelForm):
     class Meta:
         model = Tag
         fields = ('name', 'slug', 'color')
-        widgets = {'color': forms.TextInput(attrs={'type': 'color'}),}
+        widgets = {'color': forms.TextInput(attrs={'type': 'color'}), }
 
 
 class RecipeForm(forms.ModelForm):
@@ -22,9 +26,9 @@ class RecipeForm(forms.ModelForm):
         recipe_id = self.instance.id
 
         duplicate = Recipe.objects.filter(
-                author=author,
-                name=recipe_name,
-                tag__in=tags).exclude(id=recipe_id).first()
+            author=author,
+            name=recipe_name,
+            tag__in=tags).exclude(id=recipe_id).first()
         if duplicate:
             raise DuplicateRecipeException(duplicate=duplicate)
 
@@ -56,7 +60,7 @@ class RecipeIngredientInlineFormset(forms.models.BaseInlineFormSet):
             elif ingredient and not amount:
                 raise MissingAmountException(ingredient)
             elif amount and not ingredient:
-                raise MissingIngredientException
+                raise MissingIngredientException()
 
         if delete_counter == len(self.forms):
             raise MissingSelectionException()
