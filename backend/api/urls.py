@@ -29,7 +29,7 @@ urlpatterns = [
     path('<int:author_id>/subscribe/',
          SubscriptionViewSet.as_view({'post': 'create', 'delete': 'destroy'}),
          name='subscribe'),
-    path('set_password/', UserViewSet.as_view({'post': 'set_password'}),
+    path('users/set_password/', UserViewSet.as_view({'post': 'set_password'}),
          name='set_password'),
     path('auth/', include('djoser.urls.authtoken'), name='djoser_token'),
     path('', include(router.urls)),
