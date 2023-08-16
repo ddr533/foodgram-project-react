@@ -1,6 +1,6 @@
 from django.db.models import QuerySet
 
-from .models import IngredientRecipe
+from recipes.models import IngredientRecipe
 
 
 def get_ingredients_for_download(queryset: QuerySet[IngredientRecipe]) -> str:

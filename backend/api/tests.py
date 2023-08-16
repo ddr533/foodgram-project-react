@@ -12,8 +12,8 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
-from .models import (BuyList, Favorite, Ingredient, IngredientRecipe, Recipe,
-                     Tag)
+from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
+                            Recipe, Tag)
 
 User = get_user_model()
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -41,7 +41,6 @@ class RecipeTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.url_list = reverse('recipes:recipes-list')
         cls.author = User.objects.create_user(
             username='author',
             email='user1@example.com',
@@ -72,12 +71,13 @@ class RecipeTests(TestCase):
             recipe=cls.recipe,
             amount=200
         )
-        cls.url_detail = reverse('recipes:recipes-detail',
+        cls.url_list = reverse('api:recipes-list')
+        cls.url_detail = reverse('api:recipes-detail',
                                  kwargs={'pk': cls.recipe.id})
         cls.image = get_image_base64()
-        cls.buy_recipe_url = reverse('recipes:shopping_cart',
+        cls.buy_recipe_url = reverse('api:shopping_cart',
                                      kwargs={'recipe_id': cls.recipe.id})
-        cls.favorite_recipe_url = reverse('recipes:favorite',
+        cls.favorite_recipe_url = reverse('api:favorite',
                                           kwargs={'recipe_id': cls.recipe.id})
 
     def setUp(self):
@@ -185,3 +185,146 @@ class RecipeTests(TestCase):
         """Аноним не может добавить рецепт в корзину."""
         response = self.anon.post(self.buy_recipe_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class UserRegistrationTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user1 = User.objects.create_user(
+            email='user1@example.com',
+            username='user1',
+            password='password1',
+        )
+        cls.user2 = User.objects.create_user(
+            email='user2@example.com',
+            username='user2',
+            password='password2',
+        )
+
+    def setUp(self):
+        self.anon = APIClient()
+        self.client = APIClient()
+        response = self.client.post('/api/auth/token/login/', {
+            'email': 'user1@example.com',
+            'password': 'password1'
+        })
+        self.token = response.data['auth_token']
+        self.client.credentials(HTTP_AUTHORIZATION='token ' + self.token)
+
+    def test_users_list_and_detail_pages(self):
+        """Все пользователи могут просматривать список юзеров и их профили."""
+        url_list = reverse('api:user-list')
+        url_detail = reverse('api:user-detail', kwargs={'id': self.user1.id})
+        response = self.anon.get(url_list)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.anon.get(url_detail)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_anonymous_user_can_register(self):
+        """Пользователь может зарегистрироваться с корректными данными."""
+        url = reverse('api:user-list')
+        data = {
+            'email': 'test@example.com',
+            'first_name': 'first_name',
+            'last_name': 'last_name',
+            'username': 'testuser',
+            'password': 'testpassword',
+        }
+        user_counts = User.objects.count()
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue('id' in response.data)
+        self.assertEqual(User.objects.count(), user_counts + 1)
+
+    def test_anonymous_user_cant_register(self):
+        """Пользователь не может зарегистроваться с некорректными данными."""
+        url = reverse('api:user-list')
+        data = {'username': 'notuser', 'password': 'testpassword'}
+        self.client.post(url, data)
+        self.assertFalse(User.objects.filter(username='notuser').exists())
+
+    def user_can_change_password(self):
+        """Пользователь может поменять пароль."""
+        data = {'current_password': 'password1',
+                'new_password': 'testpasswordnew', }
+        url = 'api/auth/token/login'
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data = {'current_password': 'testpasswordnew',
+                'new_password': 'password1', }
+        self.client.post(url, data)
+
+    def test_user_can_subscribe(self):
+        """Авторизованный пользователь может оформить подписку.
+        В response ответа есть все ожидаемые поля."""
+        expected_fields = {'email', 'username', 'id', 'first_name',
+                           'last_name', 'is_subscribed', 'recipes',
+                           'recipes_count'}
+        url = reverse('api:subscribe', kwargs={'author_id': self.user2.id})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(self.user2.subscribed.count(), 1)
+        self.assertEqual(expected_fields, set(response.data.keys()))
+
+    def test_anon_cant_subscribe(self):
+        """Анонимный пользователь не может оформлять подписки."""
+        url = reverse('api:subscribe', kwargs={'author_id': self.user2.id})
+        response = self.anon.post(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(self.user2.subscribed.count(), 0)
+
+    def test_user_can_unsubscribe(self):
+        """Пользователь может отменить подписку."""
+        url = reverse('api:subscribe', kwargs={'author_id': self.user2.id})
+        response = self.client.post(url)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(self.user2.subscribed.count(), 0)
+
+    def test_user_cannot_subscribe_to_same_author_twice(self):
+        """Пользователь не может подписаться дважды на одного автора."""
+        url = reverse('api:subscribe', kwargs={'author_id': self.user2.id})
+        self.client.post(url)
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(self.user2.subscribed.count(), 1)
+
+    def test_user_me_page_accessible(self):
+        """Доступна страница users/me/ для авторизованного пользователя."""
+        url = reverse('api:user-me')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['username'], self.user1.username)
+
+    def test_anonymous_user_cannot_access_me_page(self):
+        """Cтраница users/me/ не доступна анонимному пользователю."""
+        url = reverse('api:user-me')
+        response = self.anon.get(url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_user_detail_endpoint(self):
+        """Пользователь не может редактировать страницу профиля."""
+        url = reverse('api:user-detail', kwargs={'id': self.user1.id})
+        response = self.client.post(url, data={})
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
+        response = self.client.put(url, data={})
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code,
+                         status.HTTP_403_FORBIDDEN)
+
+    def test_user_me_endpoint(self):
+        """Пользователь не может редактировать свою страницу me."""
+        url = reverse('api:user-me')
+        response = self.client.post(url, data={})
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
+        response = self.client.put(url, data={})
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)

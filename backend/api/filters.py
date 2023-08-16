@@ -1,8 +1,7 @@
 import django_filters
 from rest_framework import filters
-from rest_framework.exceptions import PermissionDenied
 
-from .models import Recipe
+from recipes.models import Recipe
 
 
 class IngredientsSearch(filters.BaseFilterBackend):

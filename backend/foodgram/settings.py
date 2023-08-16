@@ -25,12 +25,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework.authtoken',
-    'silk',
     'rest_framework',
     'django_filters',
     'djoser',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
+    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
@@ -41,7 +41,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'silk.middleware.SilkyMiddleware'
 ]
 
 ROOT_URLCONF = 'foodgram.urls'
@@ -117,18 +116,14 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'recipes.paginators.CustomPagination',
+    'DEFAULT_PAGINATION_CLASS': 'api.paginators.CustomPagination',
 }
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'PERMISSIONS': {
         'user_list': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
-        'user': ['users.permissions.IsOwnerOrReadOnly'],
+        'user': ['api.permissions.CustomUserPermission'],
+        'user_delete': ['rest_framework.permissions.IsAdminUser'],
     },
 }
-
-# Настройки библиотеки для тестирования скорости запросов в БД в режиме отладки
-SILKY_PYTHON_PROFILER = True
-SILKY_PYTHON_PROFILER_BINARY = True
-# SILKY_PYTHON_PROFILER_RESULT_PATH = BASE_DIR / 'silk'

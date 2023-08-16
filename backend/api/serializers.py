@@ -1,16 +1,20 @@
 import base64
 import binascii
 
+from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.models import F, Q
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from djoser.serializers import UserCreateSerializer, UserSerializer
 
-from users.serializers import CustomUserSerializer
+from users.models import Subscription
+from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
+                            Recipe, Tag)
 
-from .models import (BuyList, Favorite, Ingredient, IngredientRecipe, Recipe,
-                     Tag)
+
+User = get_user_model()
 
 
 class Base64ImageField(serializers.ImageField):
@@ -27,6 +31,23 @@ class Base64ImageField(serializers.ImageField):
             except (ValueError, TypeError, binascii.Error):
                 raise serializers.ValidationError('Invalid base64 format')
         return super().to_internal_value(data)
+
+
+class CustomUserSerializer(UserSerializer):
+    """Сериализатор для получения объектов модели User."""
+
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta(UserSerializer.Meta):
+        model = User
+        fields = ('email', 'id', 'username', 'first_name', 'last_name',
+                  'is_subscribed')
+
+    def get_is_subscribed(self, obj):
+        user = self.context['request'].user
+        if not user.is_authenticated:
+            return False
+        return Subscription.objects.filter(user=user, author=obj).exists()
 
 
 class IngredientsSerializer(serializers.ModelSerializer):
@@ -209,3 +230,74 @@ class BuyListSerializer(BaseAddRecipeSerializer):
 
     class Meta(BaseAddRecipeSerializer.Meta):
         model = BuyList
+
+
+class CustomUserCreateSerializer(UserCreateSerializer):
+    """Сериализатор для создания объекта модели User."""
+
+    class Meta(UserCreateSerializer.Meta):
+        model = User
+        fields = ('email', 'id', 'username', 'first_name', 'last_name',
+                  'password')
+
+
+class RecipeRepresentateForSuscribe(serializers.ModelSerializer):
+    """Сериализатор для представления отдельных данных о рецепте."""
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор данных из модели User c добавлением
+    дополнительных полей на основе отношений с моделью Subsription.
+    """
+
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('email', 'id', 'username', 'first_name', 'last_name',
+                  'is_subscribed', 'recipes', 'recipes_count')
+        read_only_fields = ('email', 'id', 'username', 'first_name',
+                            'last_name', 'is_subscribed', 'recipes',
+                            'recipes_count')
+
+    def get_is_subscribed(self, obj):
+        return obj.subscribed.filter(user=self.context['user']).exists()
+
+    def get_recipes(self, obj):
+        recipes_limit = self.context.get('recipes_limit')
+        queryset = Recipe.objects.filter(author=obj)
+        recipes = RecipeRepresentateForSuscribe(queryset, many=True).data
+        if recipes_limit is not None:
+            return recipes[:recipes_limit]
+        return recipes
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        user = self.context['user']
+        author = self.context['author']
+
+        if Subscription.objects.filter(
+                Q(user=user) & Q(author=author)).exists():
+            raise ValidationError(
+                f'Вы уже подписывались на пользователя {author.username}.')
+
+        if user == author:
+            raise serializers.ValidationError(
+                'Вы не можете подписываться на себя.')
+        return attrs
+
+    def create(self, validated_data):
+        user = self.context['user']
+        author = self.context['author']
+        Subscription.objects.create(user=user, author=author)
+        return author
