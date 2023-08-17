@@ -13,17 +13,17 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from users.models import Subscription
 from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
                             Recipe, Tag)
-from users.models import Subscription
-
 from .filters import CustomFilterBackend, IngredientsSearch, RecipeFilter
+from .utils import get_ingredients_for_download
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (BuyListSerializer, CustomUserCreateSerializer,
                           CustomUserSerializer, FavoriteSerializer,
                           IngredientsSerializer, RecipeSerializer,
                           SubscriptionSerializer, TagSerializer)
-from .utils import get_ingredients_for_download
+
 
 User = get_user_model()
 
@@ -144,7 +144,6 @@ class DownloadShoppingCart(APIView):
         ).values('ingredient__name', 'ingredient__measurement_unit').annotate(
             amount=Sum('amount')
         )
-        # Получаем строковое представление ingredients
         response_content: str = get_ingredients_for_download(ingredients)
         response = HttpResponse(response_content, content_type='text/plain')
         response[
