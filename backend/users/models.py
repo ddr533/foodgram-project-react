@@ -3,8 +3,9 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import CheckConstraint, F, Q, UniqueConstraint
 
-EMAIL_MAX_LEN = 254
-CHARS_MAX_LEN = 150
+from .constants import EMAIL_MAX_LEN, CHARS_MAX_LEN
+
+
 VALIDATE_USERNAME_MSG = ('Username может содержать только буквы,'
                          ' цифры или следующие символы: @/./+/-/_')
 
