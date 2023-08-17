@@ -1,22 +1,15 @@
-import re
-
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
-from rest_framework.exceptions import ValidationError
 
+from .validators import validate_hex_color
 from .constants import (CHARS_MAX_LEN, MAX_AMOUNT_INGREDIENT, MAX_COOKING_TIME,
                         MEASUREMENT_UNIT_MAX_LEN, RECIPE_NAME_MAX_LEN,
-                        RECIPE_TEXT_MAX_LEN, STR_REPR_LEN)
+                        RECIPE_TEXT_MAX_LEN, STR_REPR_LEN, HEX_COLOR_MAX_LEN)
+
 
 User = get_user_model()
-
-
-def validate_hex_color(value):
-    pattern = r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'
-    if not re.match(pattern, value):
-        raise ValidationError('Некорректный формат HEX-цвета')
 
 
 class Ingredient(models.Model):
@@ -62,6 +55,7 @@ class Tag(models.Model):
     color = models.CharField(
         blank=False,
         validators=[validate_hex_color],
+        max_length=HEX_COLOR_MAX_LEN,
         verbose_name='Цвет(HEX)'
     )
     slug = models.SlugField(
@@ -161,6 +155,12 @@ class IngredientRecipe(models.Model):
         ordering = ('recipe', 'id',)
         verbose_name = 'Ингредиенты рецепта'
         verbose_name_plural = 'Ингредиенты рецептов'
+        constraints = [UniqueConstraint(
+            fields=('recipe', 'ingredient'),
+            name='unique_recipe_ingredient',
+            violation_error_message='Этот ингредиент уже есть в рецепте.'
+        )
+        ]
 
 
 class BaseUserRecipeRelation(models.Model):
@@ -170,13 +170,11 @@ class BaseUserRecipeRelation(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
-        related_name='%(class)s_set',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         verbose_name='Рецепт',
-        related_name='%(class)s_set',
     )
 
     class Meta:
