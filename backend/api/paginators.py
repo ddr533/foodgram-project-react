@@ -1,6 +1,6 @@
 from rest_framework import pagination
 
-from backend.api.constants import PAGE_SIZE, MAX_PAGE_SIZE
+from .constants import PAGE_SIZE, MAX_PAGE_SIZE
 
 
 class CustomPagination(pagination.PageNumberPagination):

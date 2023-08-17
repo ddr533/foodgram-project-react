@@ -31,15 +31,23 @@ class CustomUserPermission(BasePermission):
     """
 
     def has_permission(self, request, view):
+        is_safe_method = request.method in SAFE_METHODS
+
+        if not is_safe_method:
+            raise MethodNotAllowed(method=request.method)
+
         if view.action == 'me':
             return request.user.is_authenticated
-        elif request.method in SAFE_METHODS:
-            return True
-        raise MethodNotAllowed(method=request.method)
+
+        return True
 
     def has_object_permission(self, request, view, obj):
+        is_safe_method = request.method in SAFE_METHODS
+
+        if not is_safe_method:
+            raise MethodNotAllowed(method=request.method)
+
         if view.action == 'me':
             return obj == request.user
-        elif request.method in SAFE_METHODS:
-            return True
-        raise MethodNotAllowed(method=request.method)
+
+        return True
