@@ -240,7 +240,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
                   'password')
 
 
-class RecipeRepresentateForSuscribe(serializers.ModelSerializer):
+class RecipeRepresentateForSubcribe(serializers.ModelSerializer):
     """Сериализатор для представления отдельных данных о рецепте."""
 
     class Meta:
@@ -272,7 +272,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def get_recipes(self, obj):
         recipes_limit = self.context.get('recipes_limit')
         queryset = obj.recipes.all()[:recipes_limit]
-        recipes = RecipeRepresentateForSuscribe(queryset, many=True).data
+        recipes = RecipeRepresentateForSubcribe(queryset, many=True).data
         if recipes_limit is not None:
             return recipes
         return recipes
