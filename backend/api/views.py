@@ -180,8 +180,8 @@ class SubscriptionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        return User.objects.filter(
-            subscribed__user=self.request.user).prefetch_related('recipes')
+        authors = self.request.user.subscribers.values('author').all()
+        return User.objects.filter(id__in=authors).prefetch_related('recipes')
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
