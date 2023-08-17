@@ -32,13 +32,18 @@ class RecipeFilter(django_filters.FilterSet):
 class CustomFilterBackend(filters.BaseFilterBackend):
     """Фильтры по наличию рецепта в избранном и в корзине."""
 
+    def _parse_boolean_param(self, value):
+        if value.lower() == '1':
+            return True
+        return False
+
     def filter_queryset(self, request, queryset, view):
         is_favorite = request.query_params.get('is_favorited')
         is_in_shopping_cart = request.query_params.get('is_in_shopping_cart')
         user = request.user
 
         if is_favorite is not None:
-            is_favorite = bool(int(is_favorite))
+            is_favorite = self._parse_boolean_param(is_favorite)
             if is_favorite:
                 queryset = queryset.filter(favorite_set__user=user)
 
