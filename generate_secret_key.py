@@ -9,5 +9,6 @@ def generate_secret_key():
     key = ''.join(random.choice(chars) for _ in range(50))
     return 'django-insecure-' + key
 
+
 if __name__ == '__main__':
     print(generate_secret_key())
