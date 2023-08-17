@@ -8,9 +8,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 dotenv_path = os.path.join(BASE_DIR.parent, '.env')
 load_dotenv(dotenv_path)
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-~n]Gb,=.~!QKtftUxXAQ%8iKIe;.DGBq}|_zpR}{E"6{Agz+!;')
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', True)
 
 if os.getenv('DJANGO_ENV') == 'production':
     ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS_PROD', '').split(',')
@@ -69,7 +69,7 @@ DATABASES = {
         'NAME': os.getenv('POSTGRES_DB', 'postgres'),
         'USER': os.getenv('POSTGRES_USER', 'postgres'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
-        'HOST': os.getenv('DB_HOST', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', 5432)
     },
 }
@@ -89,7 +89,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 
