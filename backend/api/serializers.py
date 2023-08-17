@@ -11,6 +11,7 @@ from rest_framework.exceptions import ValidationError
 
 from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
                             Recipe, Tag)
+from rest_framework.generics import get_object_or_404
 from users.models import Subscription
 
 User = get_user_model()
@@ -198,10 +199,9 @@ class BaseAddRecipeSerializer(serializers.ModelSerializer):
         # UniqueConstraint в Meta для валидации уникальности.
         model = self.Meta.model
         user = self.context['request'].user
-        recipe = self.context['recipe']
-
+        recipe_id = self.context['recipe_id']
         if model.objects.filter(
-                Q(user=user) & Q(recipe=recipe)).exists():
+                Q(user=user) & Q(recipe=recipe_id)).exists():
             raise ValidationError(
                 f'Вы уже добавили этот рецепт в {model._meta.verbose_name}.')
         return super().validate(attrs)
@@ -209,12 +209,13 @@ class BaseAddRecipeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         model = self.Meta.model
         user = self.context['request'].user
-        recipe = self.context['recipe']
-        model.objects.create(user=user, recipe=recipe)
-        return recipe
+        recipe_id = self.context['recipe_id']
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        instanse = model.objects.create(user=user, recipe=recipe)
+        return instanse
 
     def to_representation(self, instance):
-        return RepresentBaseRecipeSerializer(instance).data
+        return RepresentBaseRecipeSerializer(instance.recipe).data
 
 
 class FavoriteSerializer(BaseAddRecipeSerializer):

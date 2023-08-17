@@ -89,28 +89,13 @@ class BaseAddRecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        recipe_id = self.kwargs.get('recipe_id')
-        if recipe_id:
-            recipe = cache.get(f'recipe_{recipe_id}')
-            if not recipe:
-                recipe = get_object_or_404(Recipe, id=recipe_id)
-                cache.set(f'recipe_{recipe_id}', recipe, 300)
-            context['recipe'] = recipe
+        context['recipe_id'] = self.kwargs.get('recipe_id')
         return context
 
     def destroy(self, request, recipe_id):
-        # При запросе DELETE get_serializer_context не вызывается, как я понял
-        # Но добавил кеш, чтобы не ходить к Recipe дважды
-        try:
-            user = request.user
-            recipe = cache.get(f'recipe_{recipe_id}')
-            if not recipe:
-                recipe = get_object_or_404(Recipe, id=recipe_id)
-                cache.set(f'recipe_{recipe_id}', recipe, 300)
-            instance = get_object_or_404(self.queryset, user=user,
-                                         recipe=recipe)
-        except Exception:
-            raise ValidationError('Такой рецепт не найден в списке.')
+        user = request.user
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        instance = get_object_or_404(self.queryset, user=user, recipe=recipe)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
