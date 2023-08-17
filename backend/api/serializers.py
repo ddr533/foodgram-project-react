@@ -4,7 +4,7 @@ import binascii
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import transaction
-from django.db.models import F, Q
+from django.db.models import Q
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -13,6 +13,10 @@ from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
                             Recipe, Tag)
 from rest_framework.generics import get_object_or_404
 from users.models import Subscription
+from .validators import validate_unique_for_list, validate_number
+from recipes.constants import (MAX_COOKING_TIME, MIN_COOKING_TIME,
+                               MAX_AMOUNT_INGREDIENT, MIN_AMOUNT_INGREDIENT)
+
 
 User = get_user_model()
 
@@ -108,6 +112,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         ]
         IngredientRecipe.objects.bulk_create(ingredients)
 
+
     def create(self, validated_data):
         ingredients_data = validated_data.pop('recipe_ingredients')
         tags = validated_data.pop('tag')
@@ -136,6 +141,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         attrs = super().validate(attrs)
         tags = attrs.get('tag')
         name = attrs['name']
+        ingredients = attrs['recipe_ingredients']
+        ingredients_obj = [ingred['ingredient'] for ingred in ingredients]
+        ingredients_amount = [ingred['amount'] for ingred in ingredients]
+        cooking_time = attrs['cooking_time']
         author = self.context['request'].user
         method = self.context['request'].method
 
@@ -143,16 +152,23 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Поле "tags" должно содержать хотя бы один элемент.')
 
-        ingredients = attrs.get('recipe_ingredients')
         if not ingredients:
             raise serializers.ValidationError(
-                'Поле "ingredients" не должно быть пустым списком.'
-            )
+                'Поле "ingredients" не должно быть пустым списком.')
 
         if (method == 'POST' and Recipe.objects.filter(
                 name=name, author=author, tag__in=tags).exists()):
             raise ValidationError(
                 'У вас уже есть рецепт с таким названием и тегами.')
+
+        validate_unique_for_list('tags', tags)
+        validate_unique_for_list('ingredients', ingredients_obj)
+        validate_number(
+            'cooking_time', cooking_time, MAX_COOKING_TIME, MIN_COOKING_TIME)
+
+        for amount in ingredients_amount:
+            validate_number(
+                'amount', amount, MAX_AMOUNT_INGREDIENT, MIN_AMOUNT_INGREDIENT)
 
         return attrs
 

@@ -1,12 +1,13 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
 from .validators import validate_hex_color
 from .constants import (CHARS_MAX_LEN, MAX_AMOUNT_INGREDIENT, MAX_COOKING_TIME,
                         MEASUREMENT_UNIT_MAX_LEN, RECIPE_NAME_MAX_LEN,
-                        RECIPE_TEXT_MAX_LEN, STR_REPR_LEN, HEX_COLOR_MAX_LEN)
+                        RECIPE_TEXT_MAX_LEN, STR_REPR_LEN, HEX_COLOR_MAX_LEN,
+                        MIN_COOKING_TIME, MIN_AMOUNT_INGREDIENT)
 
 
 User = get_user_model()
@@ -93,7 +94,8 @@ class Recipe(models.Model):
         verbose_name='Описание'
     )
     cooking_time = models.PositiveIntegerField(
-        validators=[MaxValueValidator(MAX_COOKING_TIME)],
+        validators=[MaxValueValidator(MAX_COOKING_TIME),
+                    MinValueValidator(MIN_COOKING_TIME)],
         blank=False,
         verbose_name='Время приготовления (минуты)'
     )
@@ -146,7 +148,8 @@ class IngredientRecipe(models.Model):
         verbose_name='Рецепт'
     )
     amount = models.PositiveIntegerField(
-        validators=[MaxValueValidator(MAX_AMOUNT_INGREDIENT)],
+        validators=[MaxValueValidator(MAX_AMOUNT_INGREDIENT),
+                    MinValueValidator(MIN_AMOUNT_INGREDIENT)],
         blank=False,
         verbose_name='Количество'
     )
