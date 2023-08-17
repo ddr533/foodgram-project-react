@@ -45,11 +45,11 @@ class CustomFilterBackend(filters.BaseFilterBackend):
         if is_favorite is not None:
             is_favorite = self._parse_boolean_param(is_favorite)
             if is_favorite:
-                queryset = queryset.filter(favorite_set__user=user)
+                queryset = queryset.filter(favorite__user=user)
 
         if is_in_shopping_cart is not None:
             is_in_shopping_cart = bool(int(is_in_shopping_cart))
             if is_in_shopping_cart:
-                queryset = queryset.filter(buylist_set__user=user)
+                queryset = queryset.filter(buylist__user=user)
 
         return queryset

@@ -161,14 +161,16 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 'У вас уже есть рецепт с таким названием и тегами.')
 
-        validate_unique_for_list('tags', tags)
-        validate_unique_for_list('ingredients', ingredients_obj)
+        validate_unique_for_list('Теги', tags)
+        validate_unique_for_list('Ингредиенты', ingredients_obj)
         validate_number(
-            'cooking_time', cooking_time, MAX_COOKING_TIME, MIN_COOKING_TIME)
+            'Время приготовления',
+            cooking_time, MAX_COOKING_TIME, MIN_COOKING_TIME)
 
         for amount in ingredients_amount:
             validate_number(
-                'amount', amount, MAX_AMOUNT_INGREDIENT, MIN_AMOUNT_INGREDIENT)
+                'Количество',
+                amount, MAX_AMOUNT_INGREDIENT, MIN_AMOUNT_INGREDIENT)
 
         return attrs
 
