@@ -53,14 +53,14 @@ class IngredientsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = ('__all__')
+        fields = '__all__'
 
 
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ('__all__')
+        fields = '__all__'
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
@@ -192,10 +192,6 @@ class BaseAddRecipeSerializer(serializers.ModelSerializer):
         read_only_fields = ('user', 'recipe')
 
     def validate(self, attrs):
-        # Как я выяснил, UniqueTogetherValidator ищет поля из тела запроса,
-        # но мы по ТЗ ничего не передаем в теле. Поэтому пришлось оставить
-        # метод validate на уровне сериализатора, а в моделях уже использовать
-        # UniqueConstraint в Meta для валидации уникальности.
         model = self.Meta.model
         user = self.context['request'].user
         recipe_id = self.context['recipe_id']
