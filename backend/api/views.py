@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model
-from django.core.cache import cache
 from django.db.models import Exists, OuterRef, Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -13,16 +12,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from users.models import Subscription
 from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
                             Recipe, Tag)
+from users.models import Subscription
 from .filters import CustomFilterBackend, IngredientsSearch, RecipeFilter
-from .utils import get_ingredients_for_download
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (BuyListSerializer, CustomUserCreateSerializer,
                           CustomUserSerializer, FavoriteSerializer,
                           IngredientsSerializer, RecipeSerializer,
                           SubscriptionSerializer, TagSerializer)
+from .utils import get_ingredients_for_download
 
 
 User = get_user_model()

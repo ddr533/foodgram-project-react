@@ -8,14 +8,14 @@ from django.db.models import Q
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 
+from recipes.constants import (MAX_AMOUNT_INGREDIENT, MAX_COOKING_TIME,
+                               MIN_AMOUNT_INGREDIENT, MIN_COOKING_TIME)
 from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
                             Recipe, Tag)
-from rest_framework.generics import get_object_or_404
 from users.models import Subscription
-from .validators import validate_unique_for_list, validate_number
-from recipes.constants import (MAX_COOKING_TIME, MIN_COOKING_TIME,
-                               MAX_AMOUNT_INGREDIENT, MIN_AMOUNT_INGREDIENT)
+from .validators import validate_number, validate_unique_for_list
 
 
 User = get_user_model()
@@ -49,8 +49,8 @@ class CustomUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
-        return (user.is_authenticated and
-                obj.subscribed.filter(user=user).exists())
+        return (user.is_authenticated and obj.subscribed.filter(
+            user=user).exists())
 
 
 class IngredientsSerializer(serializers.ModelSerializer):
@@ -111,7 +111,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             for ingredient_data in ingredients_data
         ]
         IngredientRecipe.objects.bulk_create(ingredients)
-
 
     def create(self, validated_data):
         ingredients_data = validated_data.pop('recipe_ingredients')

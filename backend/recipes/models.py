@@ -3,12 +3,12 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
+from .constants import (CHARS_MAX_LEN, HEX_COLOR_MAX_LEN,
+                        MAX_AMOUNT_INGREDIENT, MAX_COOKING_TIME,
+                        MEASUREMENT_UNIT_MAX_LEN, MIN_AMOUNT_INGREDIENT,
+                        MIN_COOKING_TIME, RECIPE_NAME_MAX_LEN,
+                        RECIPE_TEXT_MAX_LEN, STR_REPR_LEN)
 from .validators import validate_hex_color
-from .constants import (CHARS_MAX_LEN, MAX_AMOUNT_INGREDIENT, MAX_COOKING_TIME,
-                        MEASUREMENT_UNIT_MAX_LEN, RECIPE_NAME_MAX_LEN,
-                        RECIPE_TEXT_MAX_LEN, STR_REPR_LEN, HEX_COLOR_MAX_LEN,
-                        MIN_COOKING_TIME, MIN_AMOUNT_INGREDIENT)
-
 
 User = get_user_model()
 

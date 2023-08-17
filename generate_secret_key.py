@@ -1,6 +1,7 @@
 import random
 import string
 
+
 def generate_secret_key():
     """Генерирует дефолтный секретный ключ джанго."""
 

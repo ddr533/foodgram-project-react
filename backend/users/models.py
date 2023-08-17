@@ -3,7 +3,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import CheckConstraint, F, Q, UniqueConstraint
 
-from .constants import EMAIL_MAX_LEN, CHARS_MAX_LEN
+from .constants import CHARS_MAX_LEN, EMAIL_MAX_LEN
 
 
 VALIDATE_USERNAME_MSG = ('Username может содержать только буквы,'
