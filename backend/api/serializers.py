@@ -66,10 +66,18 @@ class TagSerializer(serializers.ModelSerializer):
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(), source='ingredient')
+    name = serializers.SerializerMethodField()
+    measurement_unit = serializers.SerializerMethodField()
 
     class Meta:
         model = IngredientRecipe
-        fields = ('id', 'amount')
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+
+    def get_name(self, obj):
+        return obj.ingredient.name
+
+    def get_measurement_unit(self, obj):
+        return obj.ingredient.measurement_unit
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -154,15 +162,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         tags = instance.tag.all()
         representation['tags'] = TagSerializer(tags, many=True).data
-        annotated_ingredients = IngredientRecipe.objects.filter(
-            recipe=instance).annotate(
-            id_ingredient=F('ingredient'),
-            name=F('ingredient__name'),
-            measurement_unit=F('ingredient__measurement_unit')
-        ).values('id_ingredient', 'name', 'measurement_unit', 'amount')
-        for ingredient in annotated_ingredients:
-            ingredient['id'] = ingredient.pop('id_ingredient')
-        representation['ingredients'] = annotated_ingredients
         return representation
 
 
