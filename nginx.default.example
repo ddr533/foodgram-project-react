@@ -1,0 +1,70 @@
+server {
+    server_name адрес_сервера гиперссылка_1_сайта;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000;
+    }
+
+    location /admin/ {
+        proxy_pass http://127.0.0.1:8000;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+    }
+
+    location /sentry-debug/ {
+        proxy_pass http://127.0.0.1:8000;
+    }
+
+}
+
+server {
+    server_name адрес_сервера гиперссылка_2_сайта;
+    server_tokens off;
+
+    location /api/ {
+ 	proxy_pass http://127.0.0.1:9000;
+	client_max_body_size 20M;
+    }
+
+    location /admin/ {
+ 	proxy_pass http://127.0.0.1:9000;
+	client_max_body_size 20M;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:9000;
+    }
+
+    location /media/ {
+	proxy_pass http://127.0.0.1:9000;
+
+    }
+
+}
+
+server {
+    server_name адрес_сервера гиперссылка_3_сайта;
+    server_tokens off;
+
+    location /api/ {
+ 	proxy_pass http://127.0.0.1:9001;
+	client_max_body_size 20M;
+    }
+
+    location /admin/ {
+ 	proxy_pass http://127.0.0.1:9001;
+	client_max_body_size 20M;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:9001;
+    }
+
+    location /media/ {
+		proxy_pass http://127.0.0.1:9001;
+
+    }
+
+}
