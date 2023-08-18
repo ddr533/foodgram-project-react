@@ -46,7 +46,7 @@ jobs:
   build_and_push_to_docker_hub:
     name: Push Docker image to DockerHub
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     needs: backend_tests
     steps:
       - name: Check out the repo
@@ -69,7 +69,7 @@ jobs:
   build_frontend_and_push_to_docker_hub:
     name: Push frontend Docker image to DockerHub
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     needs: backend_tests
     steps:
       - name: Check out the repo
@@ -91,7 +91,7 @@ jobs:
   build_gateway_and_push_to_docker_hub:
     name: Push gateway Docker image to DockerHub
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     needs: backend_tests
     steps:
       - name: Check out the repo
@@ -112,7 +112,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     needs: 
       - build_and_push_to_docker_hub
       - build_frontend_and_push_to_docker_hub
@@ -147,7 +147,7 @@ jobs:
 
   send_message:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     needs: deploy
     steps:
     - name: Send message
