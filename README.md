@@ -1,3 +1,5 @@
+[![Main Foodgram workflow](https://github.com/ddr533/foodgram-project-react/actions/workflows/main.yaml/badge.svg?branch=main)](https://github.com/ddr533/foodgram-project-react//actions/workflows/main.yaml)
+
 ## FoodGram 
 ### Описание проекта  (Readme в разработке)
 «Продуктовый помощник». С помощью сервиса пользователи могут публиковать рецепты, подписываться на публикации других пользователей,
