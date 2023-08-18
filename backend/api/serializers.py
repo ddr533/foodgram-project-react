@@ -1,6 +1,7 @@
 import base64
 import binascii
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import transaction
@@ -178,6 +179,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         tags = instance.tag.all()
         representation['tags'] = TagSerializer(tags, many=True).data
+        media_url = settings.MEDIA_URL
+        representation['image'] = media_url + str(instance.image)
         return representation
 
 
