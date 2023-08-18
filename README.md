@@ -22,6 +22,7 @@
  - PostgreSQL
  - React
 
+
 ### Запуск проекта на сервере c ОС Linux
 * Установить Докер:
 ```
@@ -61,6 +62,7 @@ docker compose exec -it backend python manage.py parse_json data/ingredients.jso
 docker compose exec -it backend python manage.py createsuperuser
 ```
 
+
 ### Запуск проекта в контейнерах локально на Windows
 
 * Установить Docker Desktop и WSL. Запустить Doker Desktop.
@@ -91,6 +93,7 @@ docker compose exec -it backend python manage.py createsuperuser
   docker compose exec -it backend python manage.py createsuperuser
   ```
 * Перейти в браузере по адресу 127.0.0.1:8000
+
 
 ### Примеры запросов API:
 * Создание нового пользователя (POST):
