@@ -76,7 +76,7 @@ jobs:
     - name: Install dependencies
       run: |
         cd frontend/
-        npm install --force
+        npm install --legacy-peer-deps
     - name: Test frontend
       run: |
         cd frontend/
