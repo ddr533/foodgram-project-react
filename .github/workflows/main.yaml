@@ -44,7 +44,7 @@ jobs:
         python manage.py test
   
   build_and_push_to_docker_hub:
-    name: Push Docker image to DockerHub
+    name: Push backend Docker image to DockerHub
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     needs: backend_tests

@@ -127,3 +127,6 @@ DJOSER = {
         'user_delete': ['rest_framework.permissions.IsAdminUser'],
     },
 }
+
+
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
