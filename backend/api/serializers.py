@@ -286,8 +286,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         recipes_limit = self.context.get('recipes_limit')
         queryset = obj.recipes.all()[:recipes_limit]
         recipes = RecipeRepresentateForSubcribe(queryset, many=True).data
-        if recipes_limit is not None:
-            return recipes
         return recipes
 
     def get_recipes_count(self, obj):
