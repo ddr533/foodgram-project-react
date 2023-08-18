@@ -8,12 +8,11 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from PIL import Image
+from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
+                            Recipe, Tag)
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
-
-from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
-                            Recipe, Tag)
 
 User = get_user_model()
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)

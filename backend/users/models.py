@@ -5,7 +5,6 @@ from django.db.models import CheckConstraint, F, Q, UniqueConstraint
 
 from .constants import CHARS_MAX_LEN, EMAIL_MAX_LEN
 
-
 VALIDATE_USERNAME_MSG = ('Username может содержать только буквы,'
                          ' цифры или следующие символы: @/./+/-/_')
 

@@ -6,17 +6,16 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.models import Q
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
-
 from recipes.constants import (MAX_AMOUNT_INGREDIENT, MAX_COOKING_TIME,
                                MIN_AMOUNT_INGREDIENT, MIN_COOKING_TIME)
 from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
                             Recipe, Tag)
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from users.models import Subscription
-from .validators import validate_number, validate_unique_for_list
 
+from .validators import validate_number, validate_unique_for_list
 
 User = get_user_model()
 

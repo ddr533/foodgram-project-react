@@ -3,18 +3,17 @@ from django.db.models import Exists, OuterRef, Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
+from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
+                            Recipe, Tag)
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from recipes.models import (BuyList, Favorite, Ingredient, IngredientRecipe,
-                            Recipe, Tag)
 from users.models import Subscription
+
 from .filters import CustomFilterBackend, IngredientsSearch, RecipeFilter
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (BuyListSerializer, CustomUserCreateSerializer,
@@ -22,7 +21,6 @@ from .serializers import (BuyListSerializer, CustomUserCreateSerializer,
                           IngredientsSerializer, RecipeSerializer,
                           SubscriptionSerializer, TagSerializer)
 from .utils import get_ingredients_for_download
-
 
 User = get_user_model()
 
@@ -186,6 +184,6 @@ class SubscriptionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
     def destroy(self, request, author_id):
         author = get_object_or_404(User, id=author_id)
         instance = get_object_or_404(Subscription, user=self.request.user,
-                                         author=author)
+                                     author=author)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

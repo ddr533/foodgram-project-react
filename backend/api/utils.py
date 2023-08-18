@@ -1,5 +1,4 @@
 from django.db.models import QuerySet
-
 from recipes.models import IngredientRecipe
 
 

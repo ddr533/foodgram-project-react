@@ -1,7 +1,6 @@
 import django_filters
-from rest_framework import filters
-
 from recipes.models import Recipe
+from rest_framework import filters
 
 
 class IngredientsSearch(filters.BaseFilterBackend):
@@ -46,7 +45,8 @@ class CustomFilterBackend(filters.BaseFilterBackend):
                 queryset = queryset.filter(favorite__user=user)
 
         if is_in_shopping_cart is not None:
-            is_in_shopping_cart = self._parse_boolean_param(is_in_shopping_cart)
+            is_in_shopping_cart = self._parse_boolean_param(
+                is_in_shopping_cart)
             if is_in_shopping_cart:
                 queryset = queryset.filter(buylist__user=user)
 
