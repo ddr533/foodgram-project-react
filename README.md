@@ -170,7 +170,7 @@ tags	Array of strings. Пример: tags=lunch&tags=breakfast Рецепты с
 ```
 * Получить ингредиенты (GET):
   - api/ingredients/
-  - паоаметры:
+  - параметры:
 ```
 name - string. Поиск по частичному вхождению в начале названия ингредиента.
 ```
