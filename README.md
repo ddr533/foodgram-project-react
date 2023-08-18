@@ -1,4 +1,6 @@
-[![Main Foodgram workflow](https://github.com/ddr533/foodgram-project-react/actions/workflows/main.yaml/badge.svg?branch=main)](https://github.com/ddr533/foodgram-project-react//actions/workflows/main.yaml)
+[![Main Foodgram workflow](https://github.com/ddr533/foodgram-project-react/actions/workflows/main.yaml/badge.svg?branch=main)](https://github.com/ddr533/foodgram-project-react/actions/workflows/main.yaml)
+
+[FoodGram](https://drogal-foodgram.ddns.net)
 
 ## FoodGram 
 ### Описание проекта  (Readme в разработке)
@@ -6,7 +8,7 @@
 добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать список продуктов, необходимых для приготовления
 одного или нескольких выбранных блюд.
 
-### Основные возможности:
+### Основные возможности
 * Работа с рецептами (просмотр, публикация, добавление в избранное и т.п.).
 * Административная панель для управления сайтом.
 * Получение данных по API.
@@ -19,6 +21,45 @@
  - Docker
  - PostgreSQL
  - React
+
+### Запуск проекта на сервере c ОС Linux
+* Установить Докер:
+```
+sudo apt update
+sudo apt install curl
+curl -fSL https://get.docker.com -o get-docker.sh
+sudo sh ./get-docker.sh
+sudo apt-get install docker-compose-plugin
+sudo systemctl status docker
+```
+* Установить и настроить nginx на свободный порт (см. nginx.default.example):
+```
+sudo apt install nginx -y
+sudo systemctl start nginx
+sudo nano /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo service nginx reload
+```
+* Создать папку foodgram и скопировать в нее файл docker-compose.production.yml и папку data
+* В папке foodgram создать и заполнить файл с переменными окружен .env (см. env.example)
+* Запустить docker compose:
+```
+sudo docker compose -f docker-compose.production.yml up -d
+```
+* Выполнить миграции, собрать статические файлы бэкенда и скопировать их в /backend_static/static/:
+```
+sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
+sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
+sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
+```
+* Загрузить данные в БД:
+```
+docker compose exec -it backend python manage.py parse_json data/ingredients.json
+```
+* Создать адмнистратора для управления сайтом:
+```
+docker compose exec -it backend python manage.py createsuperuser
+```
 
 ### Запуск проекта в контейнерах локально на Windows
 
@@ -43,11 +84,11 @@
   ```
 * Загрузить данные в БД:
   ```
-  docker compose exec backend python manage.py parse_json ./data/ingredients.json
+  docker compose exec -it backend python manage.py parse_json ./data/ingredients.json
   ```
-* Создать адмнистратора для управления сайтом по адресу /admin:
+* Создать адмнистратора для управления сайтом:
   ```
-  docker compose exec backend python manage.py createsuperuser
+  docker compose exec -it backend python manage.py createsuperuser
   ```
 * Перейти в браузере по адресу 127.0.0.1:8000
 
