@@ -33,9 +33,7 @@ class CustomFilterBackend(filters.BaseFilterBackend):
     """Фильтры по наличию рецепта в избранном и в корзине."""
 
     def _parse_boolean_param(self, value):
-        if value.lower() == '1':
-            return True
-        return False
+        return value == '1'
 
     def filter_queryset(self, request, queryset, view):
         is_favorite = request.query_params.get('is_favorited')
@@ -48,7 +46,7 @@ class CustomFilterBackend(filters.BaseFilterBackend):
                 queryset = queryset.filter(favorite__user=user)
 
         if is_in_shopping_cart is not None:
-            is_in_shopping_cart = bool(int(is_in_shopping_cart))
+            is_in_shopping_cart = self._parse_boolean_param(is_in_shopping_cart)
             if is_in_shopping_cart:
                 queryset = queryset.filter(buylist__user=user)
 
