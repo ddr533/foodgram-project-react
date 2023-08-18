@@ -185,10 +185,7 @@ class SubscriptionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
 
     def destroy(self, request, author_id):
         author = get_object_or_404(User, id=author_id)
-        try:
-            instance = get_object_or_404(Subscription, user=self.request.user,
+        instance = get_object_or_404(Subscription, user=self.request.user,
                                          author=author)
-        except Exception:
-            raise ValidationError()
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
