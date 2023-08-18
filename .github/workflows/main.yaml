@@ -92,6 +92,7 @@ jobs:
     name: Push gateway Docker image to DockerHub
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    needs: backend_tests
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
