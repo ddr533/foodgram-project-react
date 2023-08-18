@@ -1,4 +1,4 @@
-[![Main Foodgram workflow](https://github.com/ddr533/foodgram-project-react/actions/workflows/main.yaml/badge.svg?branch=main)](https://github.com/ddr533/foodgram-project-react/actions/workflows/main.yaml)
+[![Main Foodgram workflow](https://github.com/ddr533/foodgram-project-react/actions/workflows/main.yaml/badge.svg?branch=master)](https://github.com/ddr533/foodgram-project-react/actions/workflows/main.yaml)
 
 [FoodGram](https://drogal-foodgram.ddns.net)
 
