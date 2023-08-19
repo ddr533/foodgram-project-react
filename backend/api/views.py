@@ -168,9 +168,8 @@ class SubscriptionViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
     def get_serializer_context(self):
         context = super().get_serializer_context()
         author_id = self.kwargs.get('author_id')
-        recipes_limit = self.request.query_params.get('recipes_limit')
-        if recipes_limit is not None and int(recipes_limit) >= 0:
-            context['recipes_limit'] = int(recipes_limit)
+        context['recipes_limit'] = self.request.query_params.get(
+            'recipes_limit')
         if author_id:
             context['author'] = get_object_or_404(User, id=author_id)
         context['user'] = self.request.user
