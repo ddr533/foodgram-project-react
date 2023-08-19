@@ -33,3 +33,8 @@ class MissingSelectionException(forms.ValidationError):
 class DuplicateTagException(forms.ValidationError):
     def __init__(self):
         super().__init__('Этот рецепт уже есть в корзине.')
+
+
+class RequiredField(forms.ValidationError):
+    def __init__(self, field_name):
+        super().__init__(f'Поле {field_name} обязательно для заполнения.')

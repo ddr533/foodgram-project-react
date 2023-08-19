@@ -2,7 +2,8 @@ from django import forms
 
 from .exceptions import (DuplicateIngredientException,
                          DuplicateRecipeException, MissingAmountException,
-                         MissingIngredientException, MissingSelectionException)
+                         MissingIngredientException, MissingSelectionException,
+                         RequiredField)
 from .models import Recipe, Tag
 
 
@@ -20,9 +21,14 @@ class RecipeForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+
+        for field_name in self.fields:
+            if field_name not in cleaned_data:
+                raise RequiredField(field_name)
+
         author = cleaned_data.get('author')
-        recipe_name = self.cleaned_data['name']
-        tags = self.cleaned_data['tag']
+        recipe_name = self.cleaned_data.get('name')
+        tags = self.cleaned_data.get('tag')
         recipe_id = self.instance.id
 
         duplicate = Recipe.objects.filter(
