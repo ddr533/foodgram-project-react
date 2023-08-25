@@ -5,6 +5,7 @@ volumes:
   static:
   media:
   data:
+
 services:
   db:
     image: postgres:13.10
@@ -34,3 +35,4 @@ services:
     volumes:
       - static:/static/
       - media:/var/www/media
+      - ./docs:/usr/share/nginx/html/api
