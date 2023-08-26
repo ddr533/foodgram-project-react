@@ -95,7 +95,7 @@ docker compose exec -it backend python manage.py createsuperuser
 * Перейти в браузере по адресу 127.0.0.1:8000
 
 
-### Примеры запросов API:
+### Примеры запросов API (все запросы доступны по адресу api/docs/):
 * Создание нового пользователя (POST):
   
   - api/users/
